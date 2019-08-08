@@ -105,119 +105,6 @@ def edges_of_each_vertex(vertices, edges, vertices_degree):
     return edges_of_each_vertex
 
 
-def all_taken(dijkstra_vertex_treated, odd_degree_vertices):
-    # TODO METHOD NOW USELESS
-    """
-    During the dijkstra's algorithm, there is no need to iterate all vertices, but only the odd degree vertices
-    :param dijkstra_vertex_treated: table, = 1 if vertex treated during dijkstra's algorithm, =0 if not
-    :param odd_degree_vertices: table, odd degre vertices numbers
-    :return: Boolean, if all odd degree vertices have been used in the dijkstra algorithm
-    Complexity : O( odd degre vertices size)
-    """
-    odd_degree_vertices_number = len(odd_degree_vertices)
-    vertices_number = len(dijkstra_vertex_treated)
-    if vertices_number >= odd_degree_vertices_number:  # make sure data are in a correct form not to fail compiling
-        i = 0
-        test = True
-        while i < odd_degree_vertices_number and test:
-            test = False
-            if dijkstra_vertex_treated[odd_degree_vertices[i]] == 1:
-                test = True
-            i += 1
-        if i == odd_degree_vertices_number and test:
-            return True
-        else:
-            return False
-    else:
-        print("Wrong, they are more odd degree vertices than vertices")
-
-
-
-def min_distance_index_not_taken(dijkstra_distance, dijkstra_vertex_treated, vertex):
-    # TODO METHOD NOW USELESS
-    """
-    Select the vertex's iteration successor for dijkstra's algorithm
-    :param dijkstra_distance: table of int, contains distances from vertex to all vertices
-    :param dijkstra_vertex_treated: table, 1 if vertex has been used in dijkstra's algorithm, 0 if not
-    :param vertex: vertex number from where dijkstra's algorithm starts
-    :return: unused vertex index of minimum distance to the parameter vertex
-    Complexity: O( dijkstra_distance size) = O( vertices size)
-    """
-    index = -1
-    min = sys.maxsize
-    for i in range(len(dijkstra_distance)):
-        if dijkstra_vertex_treated[i] == 0 and i != vertex and dijkstra_distance[i] < min:
-            # i!= vertex: distance from a vertex to itself is = 0, so the actual minimum of dist, but not the one wanted
-            min = dijkstra_distance[i]
-            index = i
-    if index == -1:
-        return "all accessible vertices used in dijkstra's algorithm"
-    else:
-        return index
-
-
-def dijkstra_vertex2(vertex, edges_of_each_vertex, odd_degree_vertices, edges):
-    # TODO METHOD NO USELESS
-    """
-    Apply dijkstra's algorithm to calculate all distances to the vertex
-    :param vertex: vertex number from where dijkstra's algorithm starts
-    :param edges_of_each_vertex: table, incident edges of each vertex
-    :param odd_degree_vertices: table, vertices number
-    :param edges: table of edges
-    :return: dijkstra_distance : distance between the parameter vertex and all points,
-            WARNING : not all distances are correct, what's needed is correct distances between parameter vertex and
-            odd degree vertices for the next methods
-            dijkstra_predecessor : path predecessor for minimum distance
-
-    Complexity: O(odd_degree_vertice size * edges size) because while loop and for loop
-    """
-    vertices_number = len(edges_of_each_vertex)
-    # initialisation
-    dijkstra_vertex_treated = vertices_number * [0]  # Vertex at 1 if treated in dijkstra algorithm, 0 if not
-    dijkstra_distance = vertices_number * [sys.maxsize]
-    dijkstra_distance[vertex] = 0
-    dijkstra_predecessor = vertices_number * [0]  # Verifier si pas d'effet de bord
-    dijkstra_predecessor[vertex] = -1
-    count_iteration = 0
-
-    # starting case
-    for i in range(len(edges_of_each_vertex[vertex])):
-        # edges_of_each_vertex[vertex] = list of incident edges to the vertex
-        # edges_of_each_vertex[vertex][i] = incident edge number to the vertex
-        dist = edges[edges_of_each_vertex[vertex][i]][2]
-
-        if edges[edges_of_each_vertex[vertex][i]][0] == vertex:
-            # then edges[edges_of_each_vertex[vertex][i]][1] is the adjacent vertex
-            adjacent_vertex_number = edges[edges_of_each_vertex[vertex][i]][1]
-        else:
-            # then edges[edges_of_each_vertex[vertex][i]][0] is the adjacent vertex
-            adjacent_vertex_number = edges[edges_of_each_vertex[vertex][i]][0]
-        dijkstra_distance[adjacent_vertex_number] = dist
-        dijkstra_predecessor[adjacent_vertex_number] = vertex
-    dijkstra_vertex_treated[vertex] = 1
-    count_iteration += 1
-
-    # standard case
-    while count_iteration < vertices_number and not all_taken(dijkstra_vertex_treated, odd_degree_vertices):
-        # iteration until all vertices or all odd degree vertices are treated
-        # TODO : is count_iteration < vertices_number useless ? Looks like it is
-        successor = min_distance_index_not_taken(dijkstra_distance, dijkstra_vertex_treated, vertex)
-        for i in range(len(edges_of_each_vertex[successor])):
-            dist = edges[edges_of_each_vertex[successor][i]][2]
-            if edges[edges_of_each_vertex[successor][i]][0] == successor:
-                adjacent_vertex_number = edges[edges_of_each_vertex[successor][i]][1]
-            else:
-                adjacent_vertex_number = edges[edges_of_each_vertex[successor][i]][0]
-            if dijkstra_distance[adjacent_vertex_number] >= dist + dijkstra_distance[successor]:
-                dijkstra_distance[adjacent_vertex_number] = dist + dijkstra_distance[successor]
-                dijkstra_predecessor[adjacent_vertex_number] = successor
-        dijkstra_vertex_treated[successor] = 1
-        count_iteration += 1
-
-    # print("all_taken:", all_taken(dijkstra_vertex_treated, odd_degree_vertices), " count_iteration:", count_iteration)
-    return dijkstra_distance, dijkstra_predecessor
-
-
 def dijkstra_vertex(vertex, edges_of_each_vertex, odd_degree_vertices, edges):
     vertices_number = len(edges_of_each_vertex)
     # initialisation
@@ -277,22 +164,22 @@ print("edges of each vertex : ", edges_of_each_vertex_A)
 
 print("len(odd_degree_vertices_A) : ", len(odd_degree_vertices_A))
 
+# TODO AUTRE EXEMPLE
+print("\n Nouvel exemple simple")
+verticesC =[0,1,2,3,4]
+edgesC = [[0,1,3],[0,2,10],[1,2,2],[3,2,2],[1,3,4],[1,4,1],[4,3,7]]
+vertices_degree_C = vertices_degree(verticesC,edgesC)
+print("vertices_degree ", vertices_degree_C)
+odd_degree_vertices_C = odd_degree_vertices(vertices_degree_C)
+print("odd_degree_vertices_C ", odd_degree_vertices_C)
+edges_of_each_vortex_C = edges_of_each_vertex(verticesC,edgesC,vertices_degree_C)
+print("edges_of_each_vortex_C ", edges_of_each_vortex_C)
+distance_matrix_C, predecessor_matrix_C = dijkstra_vertices(edges_of_each_vortex_C,odd_degree_vertices_C,edgesC)
+print("distance_matrix_C ", distance_matrix_C)
+print("predecessor_matrix_C", predecessor_matrix_C)
 
-# heap1 = []
-# print(heap1)
-# heapq.heappush(heap1, [1008,9])
-# print(heap1)
-# heapq.heappush(heap1, [1005,7])
-# print(heap1)
-# heapq.heappush(heap1, [1010,4])
-# print(heap1)
-# heapq.heappush(heap1, [1004,5])
-# print(heap1)
-# heap1[0][0] = 999
-# x, y = heap1[0]
-# print(x, y)
-# heapq.heappop(heap1)
-# print(heap1)
+
+#TODO EXEMPLE PRINCIPALE
 
 vertex_A = 14
 print(edges_of_each_vertex_A[14])
@@ -300,24 +187,27 @@ print(edges[9668])
 print(edges[10572])
 print(edges[17549])
 
-time2a = time.time()
+
 dijkstra_distance_A, dijkstra_predecessor = dijkstra_vertex(vertex_A, edges_of_each_vertex_A, odd_degree_vertices_A,
                                                             edges)
 print(dijkstra_distance_A)
 print(dijkstra_predecessor)
 time2b = time.time()
 
-print("rapide: ",time2b-time2a)
+
 
 
 
 #DIJKSTRA COMPLET
+time2a = time.time()
+
 # distance_matrix, predecessor_matrix = dijkstra_vertices(edges_of_each_vertex_A, odd_degree_vertices_A, edges)
 # print("distance_matrix")
 # print(distance_matrix)
 # print("predecessor_matrix")
 # print(predecessor_matrix)
 
+print("rapide: ", time2b-time2a)
 
 # informations générales sur la modélisation du problème
 # print("len(edges) : " , len(edges))
