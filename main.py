@@ -106,14 +106,30 @@ def edges_of_each_vertex(vertices, edges, vertices_degree):
 
 
 def dijkstra_vertex(vertex, edges_of_each_vertex, odd_degree_vertices, edges):
+    """
+    apply dijkstra's algorithm starting from parameter vertex.
+    Calculate distance and predecessor edge between parameter vertex and all other odd degree vertices
+
+    :param vertex: starting point for dijkstra's algorithm
+    :param edges_of_each_vertex:
+    :param odd_degree_vertices:
+    :param edges:
+    :return:
+    Complexity:
+    """
+    # TODO estimate complexicity
     vertices_number = len(edges_of_each_vertex)
     # initialisation
     dijkstra_distance = vertices_number * [sys.maxsize]
     dijkstra_distance[vertex] = 0
     dijkstra_predecessor = vertices_number * [0]  # Verifier si pas d'effet de bord
     dijkstra_predecessor[vertex] = -1
+
+    dijkstra_previous_edge = vertices_number * [0]
+    dijkstra_previous_edge[vertex] = -1
+
     heap = []
-    heapq.heappush(heap,[0, vertex])
+    heapq.heappush(heap, [0, vertex])
     while len(heap) != 0:
         weight,v = heap[0]
         heapq.heappop(heap)
@@ -125,26 +141,128 @@ def dijkstra_vertex(vertex, edges_of_each_vertex, odd_degree_vertices, edges):
             weight_successor = weight + edges[edges_of_each_vertex[v][i]][2]
             if weight_successor < dijkstra_distance[adjacent_v]:
                 dijkstra_distance[adjacent_v] = weight_successor
-                dijkstra_predecessor[adjacent_v] = v
+                dijkstra_predecessor[adjacent_v] = v   # = v ou bien : edges_of_each_vertex[v][i]
+                dijkstra_previous_edge[adjacent_v]= edges_of_each_vertex[v][i]
+                # TODO
                 heapq.heappush(heap, [weight_successor,adjacent_v])
 
 
-    return dijkstra_distance, dijkstra_predecessor
+    return dijkstra_distance, dijkstra_predecessor, dijkstra_previous_edge
 
 
 def dijkstra_vertices(edges_of_each_vertex, odd_degree_vertices, edges):
+    """
+    Apply dijkstra's algorithm to all odd degree vertices.
+
+    :param edges_of_each_vertex:
+    :param odd_degree_vertices:
+    :param edges:
+    :return: matrix of distance and predecessor, for all odd degree vertices
+    Complexity:
+    """
+    # TODO estimate complexity
     vertices_number = len(edges_of_each_vertex)
     odd_degree_vertices_number = len(odd_degree_vertices)
     distance_matrix = vertices_number*[sys.maxsize]
     predecessor_matrix = vertices_number*[0]
+    previous_edge_matrix = vertices_number*[0]
     # only odd degree vertices are interesting, no need to do dijkstra for all vertices
     for i in range(odd_degree_vertices_number):
         odd_degre_vertex = odd_degree_vertices[i]
-        dijkstra_distance, dijkstra_predecessor = dijkstra_vertex(odd_degre_vertex, edges_of_each_vertex, odd_degree_vertices, edges)
+        dijkstra_distance, dijkstra_predecessor, dijkstra_previous_edge = dijkstra_vertex(odd_degre_vertex, edges_of_each_vertex, odd_degree_vertices, edges)
         distance_matrix[odd_degre_vertex] = dijkstra_distance
         # problem : matrix should be mirror ?
         predecessor_matrix[odd_degre_vertex] = dijkstra_predecessor
-    return distance_matrix, predecessor_matrix
+        previous_edge_matrix[odd_degre_vertex] = dijkstra_previous_edge
+    return distance_matrix, predecessor_matrix, previous_edge_matrix
+
+
+def complete_graph(odd_degree_vertices, distance_matrix):
+    size = len(odd_degree_vertices)
+    #ci-dessous ne fonctionne pas
+    # new_dist_matrix = size*[size*[0]]
+    # for i in range(size):
+    #     for j in range(size):
+    #         # print(odd_degree_vertices[i], odd_degree_vertices[j], distance_matrix[odd_degree_vertices[i]][odd_degree_vertices[j]] )
+    #         new_dist_matrix[i][j] = distance_matrix[odd_degree_vertices[i]][odd_degree_vertices[j]]
+
+    new_dist_matrix = size*[0]
+    for i in range (size):
+        line = size*[0]
+        for j in range(size):
+            line[j] = distance_matrix[odd_degree_vertices[i]][odd_degree_vertices[j]]
+        new_dist_matrix[i] = line
+    return new_dist_matrix
+
+
+def minlist(list, treated_vertices, x):
+    # TODO improve algorithm, currently polynomial
+    size = len(list)
+    min = sys.maxsize
+    y = -1
+    for i in range(size): # i!= index because the edge of distance=0 must not be selected
+        if i!= x and not treated_vertices[i] and list[i]<min:
+            list[i] = min
+            y = i
+    if y == -1:
+        print("ERROR, no edge selected")
+    else:
+        return y
+
+
+
+
+
+
+# odd_degree_vertices_dist_matrix = new_dist_matrix
+def greedy_algorithm(odd_degree_vertices_dist_matrix):
+    print(odd_degree_vertices_dist_matrix[0])
+    print(odd_degree_vertices_dist_matrix[1])
+    size = len(odd_degree_vertices_dist_matrix)  # size is an even number
+    treated_vertices = size*[False]
+    edges_size = size/2
+    edges_selected = []
+    x = 0
+
+    print("start greedy algo:",x, edges_selected)  # TODO to be deleted
+    while len(edges_selected) != edges_size and x <size:
+        if not treated_vertices[x]:
+            print("in :",treated_vertices, odd_degree_vertices_dist_matrix[x], treated_vertices, x)
+            y = minlist(odd_degree_vertices_dist_matrix[x], treated_vertices, x)
+            edges_selected.append([x,y])
+            treated_vertices[x] = True
+            print(y, edges_selected)
+        x += 1
+
+    return edges_selected  # perfect matching
+
+
+def greedy_algorithm2(odd_degree_vertices_dist_matrix):
+    size = len(odd_degree_vertices_dist_matrix)  # size is an even number
+    for i in range(size):
+        print(odd_degree_vertices_dist_matrix[i])
+    treated_vertices = size * [False]
+    edges_size = size / 2
+    edges_selected = []
+    x = 0
+    while len(edges_selected) != edges_size and x<size:   #and x < size
+        if not treated_vertices[x]:
+            y = minlist(odd_degree_vertices_dist_matrix[x], treated_vertices, x)
+            edges_selected.append([x, y])
+            treated_vertices[x] = True
+            print(x, y, edges_selected)
+        x += 1
+
+    return edges_selected  # = perfect matching
+
+
+def ordonnancement(distance_matrix, predecessor_matrix, odd_degree_vertices, edges):
+    odd_degree_vertices_number = len(odd_degree_vertices)
+
+
+    perfect_matching = [0]
+    return perfect_matching
+
 
 
 
@@ -164,22 +282,62 @@ print("edges of each vertex : ", edges_of_each_vertex_A)
 
 print("len(odd_degree_vertices_A) : ", len(odd_degree_vertices_A))
 
-# TODO AUTRE EXEMPLE
-print("\n Nouvel exemple simple")
+
+"""EXEMPLE 2"""
+
+print("\n exemple 2")
 verticesC =[0,1,2,3,4]
 edgesC = [[0,1,3],[0,2,10],[1,2,2],[3,2,2],[1,3,4],[1,4,1],[4,3,7]]
 vertices_degree_C = vertices_degree(verticesC,edgesC)
 print("vertices_degree ", vertices_degree_C)
 odd_degree_vertices_C = odd_degree_vertices(vertices_degree_C)
 print("odd_degree_vertices_C ", odd_degree_vertices_C)
-edges_of_each_vortex_C = edges_of_each_vertex(verticesC,edgesC,vertices_degree_C)
+edges_of_each_vortex_C = edges_of_each_vertex(verticesC, edgesC, vertices_degree_C)
 print("edges_of_each_vortex_C ", edges_of_each_vortex_C)
-distance_matrix_C, predecessor_matrix_C = dijkstra_vertices(edges_of_each_vortex_C,odd_degree_vertices_C,edgesC)
+distance_matrix_C, predecessor_matrix_C, previous_edge_matrix_C = dijkstra_vertices(edges_of_each_vortex_C, odd_degree_vertices_C, edgesC)
 print("distance_matrix_C ", distance_matrix_C)
 print("predecessor_matrix_C", predecessor_matrix_C)
+print("previous_edge_matrix_C", previous_edge_matrix_C)
+new_dist_matrix_C = complete_graph(odd_degree_vertices_C, distance_matrix_C)
+print("\n new_dist_matrix_C",new_dist_matrix_C)
+
+
+#treated_vertice_C = [0,0]
+# minlist0_C = minlist(new_dist_matrix_C[0],treated_vertice_C,0)
+# minlist1_C = minlist(new_dist_matrix_C[1],treated_vertice_C,1)
+# print(minlist0_C)
+# print(minlist1_C)
+
+print("\n perfect matching")
+perfect_matching_C2 = greedy_algorithm2(new_dist_matrix_C)
+print(perfect_matching_C2)
+
+# perfect_matching_C = greedy_algorithm(new_dist_matrix_C)
+# print(perfect_matching_C)
+
+# TODO EXEMPLE 3
+"""EXEMPLE 3"""
+print("\n exemple 3")
+verticesD = [0,1,2,3,4,5,6]
+edgesD = [[0,2,3],[1,2,7],[1,5,1], [1,4,2],[4,5,4],[2,4,8],[2,6,6],[2,3,4],[3,6,1],[6,4,5],[4,3,3]]
+vertices_degree_D = vertices_degree(verticesD, edgesD)
+print("vertices_degree_D", vertices_degree_D)
+odd_degree_vertices_D = odd_degree_vertices(verticesD)
+print("odd_degree_vertices_D", odd_degree_vertices_D)
+edges_of_each_vortex_D = edges_of_each_vertex(verticesD,edgesD,vertices_degree_D)
+print("edges_of_each_vortex_D",edges_of_each_vortex_D)
+distance_matrix_D, predecessor_matrix_D, previous_edge_matrix_D = dijkstra_vertices(edges_of_each_vortex_D,odd_degree_vertices_D,edgesD)
+print("distance_matrix_D", distance_matrix_D)
+print("predecessor_matrix_D", previous_edge_matrix_D)
+print("previous_edge_matrix_D", previous_edge_matrix_D)
+new_dist_matrix_D = complete_graph(odd_degree_vertices_D, distance_matrix_D)
+print("new_dist_matrix_D", new_dist_matrix_D)
+perfect_matching_D = greedy_algorithm2(new_dist_matrix_D)
+print("perfect_matching_D", perfect_matching_D)
 
 
 #TODO EXEMPLE PRINCIPALE
+print("\n exemple principale")
 
 vertex_A = 14
 print(edges_of_each_vertex_A[14])
@@ -188,18 +346,18 @@ print(edges[10572])
 print(edges[17549])
 
 
-dijkstra_distance_A, dijkstra_predecessor = dijkstra_vertex(vertex_A, edges_of_each_vertex_A, odd_degree_vertices_A,
+dijkstra_distance_A, dijkstra_predecessor, dijkstra_previous_edge = dijkstra_vertex(vertex_A, edges_of_each_vertex_A, odd_degree_vertices_A,
                                                             edges)
+print("\n taille dijkstra_distance1", len(dijkstra_distance_A))
+print("taille dijkstra_predecessor", len(dijkstra_predecessor))
 print(dijkstra_distance_A)
 print(dijkstra_predecessor)
-time2b = time.time()
-
-
-
+print("distance à vertex_A: ", dijkstra_distance_A[vertex_A])
+print("predecesseur à vertex A ? :", dijkstra_predecessor[vertex_A])
 
 
 #DIJKSTRA COMPLET
-time2a = time.time()
+
 
 # distance_matrix, predecessor_matrix = dijkstra_vertices(edges_of_each_vertex_A, odd_degree_vertices_A, edges)
 # print("distance_matrix")
@@ -207,21 +365,7 @@ time2a = time.time()
 # print("predecessor_matrix")
 # print(predecessor_matrix)
 
-print("rapide: ", time2b-time2a)
 
-# informations générales sur la modélisation du problème
-# print("len(edges) : " , len(edges))
-# print(" len(vertices) : ", len(vertices))
-# print("\n vertices, nb of elements : ", len(vertices[0]))
-# for i in range(2):
-#     print(vertices[i])
-# print("\n edges, nb of elements : ", len(edges[0]))
-# for i in range(2):
-#     print(edges[i])
-
-
-
-# test dijkstra_vertex
 end = time.time()
 timelapse = end - start
 print(timelapse)
