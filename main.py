@@ -177,15 +177,26 @@ def dijkstra_vertices(edges_of_each_vertex, odd_degree_vertices, edges):
     return distance_matrix, predecessor_matrix, previous_edge_matrix
 
 
+def path(predecessor_matrix, previous_edge_matrix, edges, final_vertex, starting_vertex):
+    edges_path = []
+    vertices_path = []
+    edges_path.append(edges[previous_edge_matrix[starting_vertex][final_vertex]])
+    vertices_path.append(final_vertex)
+
+    cursor = final_vertex
+
+    while predecessor_matrix[starting_vertex][cursor] != -1:  # starting_vertex
+        cursor = predecessor_matrix[starting_vertex][cursor]
+        print("cursor", cursor)
+        print("edge",previous_edge_matrix[starting_vertex][cursor])
+        vertices_path.append(cursor)
+        if predecessor_matrix[starting_vertex][cursor] != -1 :
+            edges_path.append(edges[previous_edge_matrix[starting_vertex][cursor]])
+    return vertices_path, edges_path
+
+
 def complete_graph(odd_degree_vertices, distance_matrix):
     size = len(odd_degree_vertices)
-    #ci-dessous ne fonctionne pas
-    # new_dist_matrix = size*[size*[0]]
-    # for i in range(size):
-    #     for j in range(size):
-    #         # print(odd_degree_vertices[i], odd_degree_vertices[j], distance_matrix[odd_degree_vertices[i]][odd_degree_vertices[j]] )
-    #         new_dist_matrix[i][j] = distance_matrix[odd_degree_vertices[i]][odd_degree_vertices[j]]
-
     new_dist_matrix = size*[0]
     for i in range (size):
         line = size*[0]
@@ -210,37 +221,10 @@ def minlist(list, treated_vertices, x):
         return y
 
 
-
-
-
-
-# odd_degree_vertices_dist_matrix = new_dist_matrix
-def greedy_algorithm(odd_degree_vertices_dist_matrix):
-    print(odd_degree_vertices_dist_matrix[0])
-    print(odd_degree_vertices_dist_matrix[1])
+def greedy_algorithm(odd_degree_vertices_dist_matrix):  # odd_degree_vertices_dist_matrix = new_dist_matrix
     size = len(odd_degree_vertices_dist_matrix)  # size is an even number
-    treated_vertices = size*[False]
-    edges_size = size/2
-    edges_selected = []
-    x = 0
-
-    print("start greedy algo:",x, edges_selected)  # TODO to be deleted
-    while len(edges_selected) != edges_size and x <size:
-        if not treated_vertices[x]:
-            print("in :",treated_vertices, odd_degree_vertices_dist_matrix[x], treated_vertices, x)
-            y = minlist(odd_degree_vertices_dist_matrix[x], treated_vertices, x)
-            edges_selected.append([x,y])
-            treated_vertices[x] = True
-            print(y, edges_selected)
-        x += 1
-
-    return edges_selected  # perfect matching
-
-
-def greedy_algorithm2(odd_degree_vertices_dist_matrix):
-    size = len(odd_degree_vertices_dist_matrix)  # size is an even number
-    for i in range(size):
-        print(odd_degree_vertices_dist_matrix[i])
+    # for i in range(size):
+    #     print(odd_degree_vertices_dist_matrix[i])
     treated_vertices = size * [False]
     edges_size = size / 2
     edges_selected = []
@@ -251,13 +235,16 @@ def greedy_algorithm2(odd_degree_vertices_dist_matrix):
             edges_selected.append([x, y])
             treated_vertices[x] = True
             treated_vertices[y] = True
-            print(x, y, edges_selected)
+            # print(x, y, edges_selected)
         x += 1
 
     return edges_selected  # = perfect matching
 
 
-def ordonnancement(distance_matrix, predecessor_matrix, odd_degree_vertices, edges):
+
+
+
+def scheduling(distance_matrix, predecessor_matrix, odd_degree_vertices, edges):
     odd_degree_vertices_number = len(odd_degree_vertices)
 
 
@@ -278,6 +265,8 @@ print("\n ZONE DE TEST \n")
 print("\n exemple 2")
 verticesC =[0,1,2,3,4]
 edgesC = [[0,1,3],[0,2,10],[1,2,2],[3,2,2],[1,3,4],[1,4,1],[4,3,7]]
+print("verticesC", verticesC)
+print("edgesC", edgesC)
 vertices_degree_C = vertices_degree(verticesC,edgesC)
 print("vertices_degree ", vertices_degree_C)
 odd_degree_vertices_C = odd_degree_vertices(vertices_degree_C)
@@ -289,27 +278,29 @@ print("distance_matrix_C ", distance_matrix_C)
 print("predecessor_matrix_C", predecessor_matrix_C)
 print("previous_edge_matrix_C", previous_edge_matrix_C)
 new_dist_matrix_C = complete_graph(odd_degree_vertices_C, distance_matrix_C)
-print("\n new_dist_matrix_C",new_dist_matrix_C)
+print("new_dist_matrix_C",new_dist_matrix_C)
+perfect_matching_C = greedy_algorithm(new_dist_matrix_C)
+print("perfect matching_C", perfect_matching_C)
+
+# vertices_path_C34, edges_path_C34 = path(predecessor_matrix_C, previous_edge_matrix_C, edgesC, 2,3)
+# print("vertices_path_C34", vertices_path_C34)
+# print("edges_path_C34", edges_path_C34)
+
+# vertices_path_C43, edges_path_C43 = path(predecessor_matrix_C, previous_edge_matrix_C, edgesC, 3,2)
+# print("vertices_path_C43", vertices_path_C43)
+# print("edges_path_C43", edges_path_C43)
+
+vertices_path_C43bis, edges_path_C43bis = path(predecessor_matrix_C, previous_edge_matrix_C, edgesC, 3,2)
+print("vertices_path_C43bis", vertices_path_C43bis)
+print("edges_path_C43bis", edges_path_C43bis)
 
 
-#treated_vertice_C = [0,0]
-# minlist0_C = minlist(new_dist_matrix_C[0],treated_vertice_C,0)
-# minlist1_C = minlist(new_dist_matrix_C[1],treated_vertice_C,1)
-# print(minlist0_C)
-# print(minlist1_C)
-
-print("\n perfect matching")
-perfect_matching_C2 = greedy_algorithm2(new_dist_matrix_C)
-print(perfect_matching_C2)
-
-# perfect_matching_C = greedy_algorithm(new_dist_matrix_C)
-# print(perfect_matching_C)
-
-# TODO EXEMPLE 3
 """EXEMPLE 3"""
 print("\n exemple 3")
 verticesD = [0,1,2,3,4,5,6]
 edgesD = [[0,2,3],[1,2,7],[1,5,1], [1,4,2],[4,5,4],[2,4,8],[2,6,6],[2,3,4],[3,6,1],[6,4,5],[4,3,3]]
+print("verticesD", verticesD)
+print("edgesD", edgesD)
 vertices_degree_D = vertices_degree(verticesD, edgesD)
 print("vertices_degree_D", vertices_degree_D)
 odd_degree_vertices_D = odd_degree_vertices(vertices_degree_D)
@@ -323,10 +314,29 @@ print("previous_edge_matrix_D", previous_edge_matrix_D)
 new_dist_matrix_D = complete_graph(odd_degree_vertices_D, distance_matrix_D)
 print("new_dist_matrix_D", new_dist_matrix_D)
 
-perfect_matching_D = greedy_algorithm2(new_dist_matrix_D) #attention c'est greedy_algoritm2 !!
+perfect_matching_D = greedy_algorithm(new_dist_matrix_D)
 print("perfect_matching_D", perfect_matching_D)
 
+# vertices_path_D_31, edges_path_D31 = path(predecessor_matrix_D, previous_edge_matrix_D, edgesD, 3, 1)
+# print("vertices_path_D_31", vertices_path_D_31)
+# print("edges_path_D31", edges_path_D31)
 
+vertices_path_D_31bis, edges_path_D31bis = path(predecessor_matrix_D, previous_edge_matrix_D, edgesD, 3, 1)
+print("vertices_path_D_31bis", vertices_path_D_31bis)
+print("edges_path_D31bis", edges_path_D31bis)
+
+vertices_path_D60, edges_path_D60 = path(predecessor_matrix_D, previous_edge_matrix_D, edgesD, 6, 0)
+print("vertices_path_D60", vertices_path_D60)
+print("edges_path_D60", edges_path_D60)
+
+
+vertices_path_D06, edges_path_D06 = path(predecessor_matrix_D, previous_edge_matrix_D, edgesD, 0, 6)
+print("vertices_path_D06", vertices_path_D06)
+print("edges_path_D06", edges_path_D06)
+
+
+""" Exemple 4 """
+print("\n exemple 4")
 
 
 #TODO EXEMPLE PRINCIPALE
@@ -380,4 +390,5 @@ print(timelapse)
 print("fin")
 
 # vertices, edges = parse_file("paris_map.txt") #sys.argv[1]
-# plot_sample(vertices, edges, 50000) #sys.argv[2]
+#plot_sample(vertices, edges, 50000) #sys.argv[2]
+
