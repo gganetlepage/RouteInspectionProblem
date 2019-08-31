@@ -56,5 +56,5 @@ Certains sommets n'ont pas besoin de devenir de degré pair si les véhicules d�
 
 3) Je n'ai pas réussi à réaliser le codage en entier du problème, je me suis arrêté au "point 4)"
 
-
 Note : J'ai remplacé les sys.argv par des valeurs fixes dans mon main.py
+

@@ -5,6 +5,7 @@ from random import randint
 import sys
 import time
 import heapq
+import copy
 
 def parse_file(file_name):
     with open(file_name, "r") as f:
@@ -31,6 +32,7 @@ def parse_file(file_name):
 
 
 def plot_sample(vertices, edges, number):
+
     # plot vertices
     sample_1 = [vertices[randint(0, len(vertices) - 1)] for _ in range(0, int(number))]
     pyplt.plot([_[0] for _ in sample_1], [_[1] for _ in sample_1], ".")
@@ -43,7 +45,7 @@ def plot_sample(vertices, edges, number):
     pyplt.show()
 
 
-# Resolution Probleme
+# Problem Solving
 
 def vertices_degree(vertices, edges):
     """
@@ -58,7 +60,8 @@ def vertices_degree(vertices, edges):
     edges_number = len(edges)
     vertices_degree = vertices_number * [0]
     for i in range(edges_number):
-        vertices_degree[edges[i][0]] += 1  # 1 edge = degree increases for the 2 incident vertices
+        # 1 edge = increased degree for the 2 incident vertices
+        vertices_degree[edges[i][0]] += 1  
         vertices_degree[edges[i][1]] += 1
     return vertices_degree
 
@@ -87,17 +90,11 @@ def edges_of_each_vertex(vertices, edges, vertices_degree):
     :return: table, incident edges number for each vertex
     Complexity: O(edges size)
     """
-    vertices_number = len(vertices)  # len(vertices) ou len(vertices_degree)
+    vertices_number = len(vertices)  
     edges_number = len(edges)
     edges_of_each_vertex = vertices_number * [0]
     count_occurence = vertices_number * [0]
-    # print("show vertices_degree OKb",vertices_degree)
-    # print("longueur : ", len(vertices_degree))
-    # print(vertices_degree[0])
     for i in range(vertices_number):
-        # print("inside edges of each vertex")
-        # print(edges_of_each_vertex)
-        # print(vertices_degree[i])
         edges_of_each_vertex[i] = vertices_degree[i] * [0]
     for j in range(edges_number):
         first_vertex = edges[j][0]
@@ -149,7 +146,6 @@ def dijkstra_vertex(vertex, edges_of_each_vertex, odd_degree_vertices, edges):
                 dijkstra_distance[adjacent_v] = weight_successor
                 dijkstra_predecessor[adjacent_v] = v   # = v ou bien : edges_of_each_vertex[v][i]
                 dijkstra_previous_edge[adjacent_v]= edges_of_each_vertex[v][i]
-                # TODO
                 heapq.heappush(heap, [weight_successor, adjacent_v])
     return dijkstra_distance, dijkstra_predecessor, dijkstra_previous_edge
 
@@ -226,6 +222,7 @@ def greedy_algorithm(odd_degree_vertices_dist_matrix):  # odd_degree_vertices_di
     return edges_selected  # = perfect matching #Attention les indices de sommets sélectionnés sont ceux du graphe de sommets de degré impair uniquement
 # il faut donc faire attention à ensuite convertir en ceux du graphe total original
 
+
 def greedy_algorithm2(odd_degree_vertices_dist_matrix, odd_degree_vertices):  # odd_degree_vertices_dist_matrix = new_dist_matrix
     size = len(odd_degree_vertices_dist_matrix)  # size is an even number
     # for i in range(size):
@@ -242,12 +239,6 @@ def greedy_algorithm2(odd_degree_vertices_dist_matrix, odd_degree_vertices):  # 
             treated_vertices[y] = True
         x += 1
     return edges_selected  # = correct perfect matching, with index matching those in the general graph
-
-
-# def conversion_(perfect_matching, odd_degree_vertices):
-#     size = len(perfect_matching)
-#     conversion = []
-
 
 
 def path(predecessor_matrix, previous_edge_matrix, edges, final_vertex, starting_vertex): #path() can't be applied with a even degree vertex
@@ -268,11 +259,9 @@ def path(predecessor_matrix, previous_edge_matrix, edges, final_vertex, starting
 
 
 
-
-
 def graph_with_added_edges(perfect_matching, predecessor_matrix, previous_edge_matrix, edges):
     size = len(perfect_matching)
-    new_edges = edges
+    new_edges = copy.copy(edges)
     for i in range(size):
         vertices_path, edges_path = path(predecessor_matrix, previous_edge_matrix, edges, perfect_matching[i][0], perfect_matching[i][1])
         for j in range(len(edges_path)):
@@ -280,26 +269,97 @@ def graph_with_added_edges(perfect_matching, predecessor_matrix, previous_edge_m
     return new_edges
 
 
+def totaldistance(new_edges):
+    size = len(new_edges)
+    d = 0
+    for i in range(size):
+        d += new_edges[i][2]
+    return d
 
-def scheduling(distance_matrix, predecessor_matrix, odd_degree_vertices, edges):
-    odd_degree_vertices_number = len(odd_degree_vertices)
+
+def available_edge_index(available_edges):  # available_edges tableau de boolean
+    i = 0
+    size = len(available_edges)
+    bool = True
+    while i< size and not available_edges[i]:
+        i += 1
+    if i == size:
+        bool = False # "Toutes les arêtes ont été prises"
+    return bool, i  # i = available edge index
 
 
-    perfect_matching = [0]
-    return perfect_matching
+def following_edge(vertex, edges, edges_of_each_vertex, available_edges):
+    found = False
+    i = 0
+    size = len(edges_of_each_vertex[vertex])
+    while i < size and not found:
+        current_edge = edges_of_each_vertex[vertex][i]
+        if available_edges[current_edge]:
+            found = True
+        else:
+            i += 1
 
+    return found, current_edge
+
+
+def cycle(starting_vertex, edges, edges_of_each_vertex,available_edges):
+    cycle = []
+    current_vertex = starting_vertex
+    boolean_edges, selected_edge = following_edge(current_vertex, edges, edges_of_each_vertex, available_edges)
+    while boolean_edges:
+        cycle.append(selected_edge)
+        available_edges[selected_edge] = False
+        if edges[selected_edge][0] == current_vertex:
+            current_vertex = edges[selected_edge][1]
+        else:
+            current_vertex = edges[selected_edge][0]
+        boolean_edges, selected_edge = following_edge(current_vertex, edges, edges_of_each_vertex, available_edges)
+    return cycle, available_edges
+
+def cycle_list(edges, edges_of_each_vertex):
+    size = len(edges)
+    available_edges = size * [True]
+    cycle_list = []
+    bool = True
+    starting_vertex = 0
+    compteur = 0 #TODO
+    while bool and compteur < 5:
+        cycle2, available_edges = cycle(starting_vertex, edges, edges_of_each_vertex, available_edges) #effet de bord sur available_edges
+#        print("cycle2", cycle2)
+#        print("available_edges", available_edges)
+        cycle_list.append(cycle2)
+#        print("cycle_list", cycle_list)
+        bool, available_edge_index2 = available_edge_index(available_edges)
+#        print("bool", bool)
+#        print("available_edge_index2", available_edge_index2)
+        if bool:
+            starting_vertex = edges[available_edge_index2][0]
+#            print("starting_vertex", starting_vertex)
+        compteur += 1
+#        print(cycle2, available_edges)
+#        print(cycle_list)
+    return cycle_list
+
+
+
+
+
+
+#def scheduling(edges, edges_of_each_vertex): #edges = new_edges and edges_of_each_vertex = new_edges_of_each_vertex
+#    cycle_list = cycle_list(edges, edges_of_each_vertex)
+#    eulerian_cycle = eulerian_cycle(cycle_list)
+#    return eulerian_cycle
 
 
 def solving(vertices, edges):
-    vertices_degree_s = vertices_degree(vertices, edges)
-    odd_degree_vertices_s = odd_degree_vertices(vertices_degree_s)
-    edges_of_each_vertex_s = edges_of_each_vertex(vertices, edges, vertices_degree)
-    distance_matrix_s, predecessor_matrix_s, previous_edge_matrix_s = dijkstra_vertices(edges_of_each_vertex_s, odd_degree_vertices_s, edges)
-    new_dist_matrix_s = complete_graph(odd_degree_vertices_s, distance_matrix_s)
-    perfect_matching_s = greedy_algorithm(new_dist_matrix_s)
-
-    return perfect_matching_s
-    # return new_dist_matrix_s
+    vertices_deg = vertices_degree(vertices, edges)
+    odd_deg_vertices = odd_degree_vertices(vertices_deg)
+    edges_per_vertex = edges_of_each_vertex(vertices_deg, edges, vertices_deg)
+    distance_matrix, predecessor_matrix, previous_edge_matrix = dijkstra_vertices(edges_per_vertex, odd_deg_vertices, edges)
+     
+    return "odd", odd_deg_vertices,"edges", edges_per_vertex, "dist", distance_matrix, "pred", predecessor_matrix, "prev", previous_edge_matrix
+    
+    
 
 start = time.time()
 
@@ -312,70 +372,106 @@ print("\n ZONE DE TEST \n")
 print("\n exemple 2")
 verticesC =[0,1,2,3,4]
 edgesC = [[0,1,3],[0,2,10],[1,2,2],[3,2,2],[1,3,4],[1,4,1],[4,3,7]]
-print("verticesC", verticesC)
-print("edgesC", edgesC)
-vertices_degree_C = vertices_degree(verticesC,edgesC)
-print("vertices_degree ", vertices_degree_C)
-odd_degree_vertices_C = odd_degree_vertices(vertices_degree_C)
-print("odd_degree_vertices_C ", odd_degree_vertices_C)
-edges_of_each_vortex_C = edges_of_each_vertex(verticesC, edgesC, vertices_degree_C)
-print("edges_of_each_vortex_C ", edges_of_each_vortex_C)
-distance_matrix_C, predecessor_matrix_C, previous_edge_matrix_C = dijkstra_vertices(edges_of_each_vortex_C, odd_degree_vertices_C, edgesC)
-print("distance_matrix_C ", distance_matrix_C)
-print("predecessor_matrix_C", predecessor_matrix_C)
-print("previous_edge_matrix_C", previous_edge_matrix_C)
-new_dist_matrix_C = complete_graph(odd_degree_vertices_C, distance_matrix_C)
-print("new_dist_matrix_C",new_dist_matrix_C)
-perfect_matching_C = greedy_algorithm(new_dist_matrix_C)
-print("perfect matching_C", perfect_matching_C)
+#vertices_degree_C = vertices_degree(verticesC,edgesC)
+#odd_degree_vertices_C = odd_degree_vertices(vertices_degree_C)
+#edges_of_each_vortex_C = edges_of_each_vertex(verticesC, edgesC, vertices_degree_C)
+#distance_matrix_C, predecessor_matrix_C, previous_edge_matrix_C = dijkstra_vertices(edges_of_each_vortex_C, odd_degree_vertices_C, edgesC)
+print(solving(verticesC, edgesC))
+#new_dist_matrix_C = complete_graph(odd_degree_vertices_C, distance_matrix_C)
+#correct_perfect_matching_C = greedy_algorithm2(new_dist_matrix_C,odd_degree_vertices_C)
+#new_edgesC = graph_with_added_edges(correct_perfect_matching_C, predecessor_matrix_C, previous_edge_matrix_C, edgesC)
+#totdistC = totaldistance(new_edgesC)
+#new_vertices_degree_C = vertices_degree(verticesC, new_edgesC)
+#new_edges_of_each_vertex_C = edges_of_each_vertex(verticesC, new_edgesC, new_vertices_degree_C)
 
-correct_perfect_matching_C = greedy_algorithm2(new_dist_matrix_C,odd_degree_vertices_C)
-print("correct_perfect_matching_C", correct_perfect_matching_C)
-vertices_path_C43, edges_path_C43 = path(predecessor_matrix_C, previous_edge_matrix_C, edgesC, 3,2)
-print("vertices_path_C43", vertices_path_C43)
-print("edges_path_C43", edges_path_C43)
 
-new_edgesC = graph_with_added_edges(correct_perfect_matching_C, predecessor_matrix_C, previous_edge_matrix_C, edgesC)
-print("new_edgesC", new_edgesC)
-# new_dist_matrix_C = solving(verticesC, edgesC)
+#print("verticesC", verticesC)
+#print("edgesC", edgesC)
+#print("vertices_degree ", vertices_degree_C)
+#print("odd_degree_vertices_C ", odd_degree_vertices_C)
+#print("edges_of_each_vortex_C ", edges_of_each_vortex_C)
+#print("distance_matrix_C ", distance_matrix_C)
+#print("predecessor_matrix_C", predecessor_matrix_C)
+#print("previous_edge_matrix_C", previous_edge_matrix_C)
+#
+#
+#
+#print("new_dist_matrix_C",new_dist_matrix_C)
+#print("correct_perfect_matching_C", correct_perfect_matching_C)
+#print("new_edgesC", new_edgesC)
+#print("new_vertices_degree_C", new_vertices_degree_C)
+#print("new_edges_of_each_vertex_C", new_edges_of_each_vertex_C)
+
+
+# TODO ici on applique le problème à l'exemple C
+
+
+#available_edgesC = len(edgesC) * [True]
+#cycle_listC = []
+#cycleC1, available_edgesC1 = cycle(0,new_edgesC, new_edges_of_each_vertex_C, available_edgesC)
+#cycle_listC.append(cycleC1)
+#boolC1, following_edgeC1 = available_edge_index(available_edgesC1)
+#following_vertex_C1 = edgesC[following_edgeC1][0]
+#print("cycleC1", cycleC1, available_edgesC1)
+#print("cycle_listC", cycle_listC)
+#print("boolC1", boolC1)
+#print("follow i:1",following_edgeC1, following_vertex_C1)
+#cycleC2, available_edgesC2 = cycle(following_vertex_C1, new_edgesC, new_edges_of_each_vertex_C, available_edgesC1)
+#cycle_listC.append(cycleC2)
+#boolC2, following_edgeC2 = available_edge_index(available_edgesC2)
+#print("cycleC2", cycleC2, available_edgesC2)
+#print("cycle_listC",cycle_listC)
+#print("boolC2", boolC2)
+
+
+#
+#cycle_listC = cycle_list(edgesC, edges_of_each_vortex_C)
+#print("cycle_listC", cycle_listC)
+
+
+# ne marche pas comme il le faudrait
+
+
 
 
 """EXEMPLE 3"""
 print("\n exemple 3")
 verticesD = [0,1,2,3,4,5,6]
 edgesD = [[0,2,3],[1,2,7],[1,5,1], [1,4,2],[4,5,4],[2,4,8],[2,6,6],[2,3,4],[3,6,1],[6,4,5],[4,3,3]]
-print("verticesD", verticesD)
-print("edgesD", edgesD)
 vertices_degree_D = vertices_degree(verticesD, edgesD)
-print("vertices_degree_D", vertices_degree_D)
 odd_degree_vertices_D = odd_degree_vertices(vertices_degree_D)
-print("odd_degree_vertices_D", odd_degree_vertices_D)
 edges_of_each_vortex_D = edges_of_each_vertex(verticesD,edgesD,vertices_degree_D)
-print("edges_of_each_vortex_D",edges_of_each_vortex_D)
 distance_matrix_D, predecessor_matrix_D, previous_edge_matrix_D = dijkstra_vertices(edges_of_each_vortex_D,odd_degree_vertices_D,edgesD)
+new_dist_matrix_D = complete_graph(odd_degree_vertices_D, distance_matrix_D)
+correct_perfect_matching_D = greedy_algorithm2(new_dist_matrix_D, odd_degree_vertices_D)
+new_edges_D = graph_with_added_edges(correct_perfect_matching_D, predecessor_matrix_D, previous_edge_matrix_D, edgesD)
+totdistD = totaldistance(new_edges_D)
+new_vertices_degree_D = vertices_degree(verticesD, new_edges_D)
+new_edges_of_each_vertex_D = edges_of_each_vertex(verticesD, new_edges_D, new_vertices_degree_D)
+
+# print("verticesD", verticesD)
+# print("edgesD", edgesD)
+print("vertices_degree_D", vertices_degree_D)
+print("odd_degree_vertices_D", odd_degree_vertices_D)
+print("edges_of_each_vortex_D",edges_of_each_vortex_D)
 print("distance_matrix_D", distance_matrix_D)
 print("predecessor_matrix_D", predecessor_matrix_D)
 print("previous_edge_matrix_D", previous_edge_matrix_D)
-new_dist_matrix_D = complete_graph(odd_degree_vertices_D, distance_matrix_D)
 print("new_dist_matrix_D", new_dist_matrix_D)
-
-perfect_matching_D = greedy_algorithm(new_dist_matrix_D)
-print("perfect_matching_D", perfect_matching_D)
-
-correct_perfect_matching_D = greedy_algorithm2(new_dist_matrix_D, odd_degree_vertices_D)
 print("correct_perfect_matching_D", correct_perfect_matching_D)
-
-new_edges_D = graph_with_added_edges(perfect_matching_D, predecessor_matrix_D, previous_edge_matrix_D, edgesD)
 print("new_edges_D", new_edges_D)
+print("totdistD", totdistD)
 
-vertices_path_D60, edges_path_D60 = path(predecessor_matrix_D, previous_edge_matrix_D, edgesD, 6, 0)
-vertices_path_D20, edges_path_D20 = path(predecessor_matrix_D, previous_edge_matrix_D, edgesD, 2,0)
-vertices_path_D14, edges_path_D14 =  path(predecessor_matrix_D, previous_edge_matrix_D, edgesD, 1,4)
-vertices_path_D36, edges_path_D36 =  path(predecessor_matrix_D, previous_edge_matrix_D, edgesD, 3,6)
-print("D60", vertices_path_D60, edges_path_D60)
-print("D20",vertices_path_D20, edges_path_D20)
-print("D14",vertices_path_D14, edges_path_D14)
-print("D36", vertices_path_D36, edges_path_D36)
+
+# TODO ici on applique le problème à l'exemple D
+#available_edgesD = len(edgesD) * [True]
+#cycleD1, available_edgesD1 = cycle(0,edgesD, new_edges_of_each_vertex_D, available_edgesD)
+#print("edgesD[9][0]", edgesD[9][0])
+#cycleD2, available_edgesD2 = cycle(6, edgesD, new_edges_of_each_vertex_D, available_edgesD1)
+# print("cycleD1", cycleD1, available_edgesD1)
+# print("cycleD2", cycleD2, available_edgesD2)
+
+
 
 """Exemple 4"""
 print("\n Exemple 4")
@@ -388,14 +484,23 @@ distance_matrix_E, predecessor_matrix_E, previous_edge_matrix_E = dijkstra_verti
 new_dist_matrix_E = complete_graph(odd_degree_vertices_E, distance_matrix_E)
 perfect_matching_E = greedy_algorithm(new_dist_matrix_E)
 correct_perfect_matching_E = greedy_algorithm2(new_dist_matrix_E, odd_degree_vertices_E)
+new_edges_E = graph_with_added_edges(correct_perfect_matching_E, predecessor_matrix_E, previous_edge_matrix_E, edgesE)
+totdistE = totaldistance(new_edges_E)
+new_vertices_degree_E = vertices_degree(verticesE, new_edges_E)
+new_edges_of_each_vertex_E = edges_of_each_vertex(verticesE, new_edges_E, new_vertices_degree_E)
+
+print("edgesE",len(edgesE), edgesE)
 print("odd_degree_vertices_E", odd_degree_vertices_E)
 print("perfect_matching_E", perfect_matching_E)
 print("correct_perfect_matching_E", correct_perfect_matching_E)
+print("new_edges_E",len(new_edges_E), new_edges_E)
+print("totdistE", totdistE)
 
-vertices_path_E02, edges_path_E02 = path(predecessor_matrix_E, previous_edge_matrix_E, edgesE, 0,2)
-vertices_path_E75, edges_path_E75 = path(predecessor_matrix_E, predecessor_matrix_E, edgesE, 7,5)
-print("E02", vertices_path_E02, edges_path_E02)
-print("E65", vertices_path_E75, edges_path_E75)
+# TODO ici on applique le problème à l'exemple E
+#available_edgesE = len(edgesE) * [True]
+#cycleE1, available_edgesE1 = cycle(0,edgesE, new_edges_of_each_vertex_E, available_edgesE)
+
+# print("cycleE1", cycleE1, available_edgesE1)
 
 
 
@@ -405,16 +510,39 @@ print("E65", vertices_path_E75, edges_path_E75)
 
 print("\n exemple principale")
 
-vertices_degree_A = vertices_degree(vertices, edges)
-print("vertices_degree : ", vertices_degree_A)
+# vertices_degree_A = vertices_degree(vertices, edges)
+# odd_degree_vertices_A = odd_degree_vertices(vertices_degree_A)
+# edges_of_each_vertex_A = edges_of_each_vertex(vertices, edges, vertices_degree_A)
+# distance_matrix_A, predecessor_matrix_A, previous_edge_matrix_A = dijkstra_vertices(edges_of_each_vertex_A, odd_degree_vertices_A, edges)
+# new_dist_matrix_A = complete_graph(odd_degree_vertices_A, distance_matrix_A)
+#
+# correct_perfect_matching_A = greedy_algorithm2(new_dist_matrix_A, odd_degree_vertices_A)
+#
+# new_edges_A = graph_with_added_edges(correct_perfect_matching_A, predecessor_matrix_A,previous_edge_matrix_A,edges)
+# totdist_A = totaldistance(new_edges_A)
+#
+# print("totdist_A", totdist_A)
 
-odd_degree_vertices_A = odd_degree_vertices(vertices_degree_A)
-print("odd_degree_vertices : ", odd_degree_vertices_A)
 
-edges_of_each_vertex_A = edges_of_each_vertex(vertices, edges, vertices_degree_A)
-print("edges of each vertex : ", edges_of_each_vertex_A)
 
-print("len(odd_degree_vertices_A) : ", len(odd_degree_vertices_A))
+
+
+
+
+
+
+
+# print("vertices_degree : ", vertices_degree_A)
+# print("odd_degree_vertices : ", odd_degree_vertices_A)
+#
+# print("edges of each vertex : ", edges_of_each_vertex_A)
+#
+# print("len(odd_degree_vertices_A) : ", len(odd_degree_vertices_A))
+#
+# print("new_dist_matrix_A", new_dist_matrix_A)
+
+# print("correct_perfect_matching_A", correct_perfect_matching_A)
+
 
 
 # test sur sommet numero 14 :
@@ -439,14 +567,6 @@ print("len(odd_degree_vertices_A) : ", len(odd_degree_vertices_A))
 #DIJKSTRA COMPLET
 
 
-# distance_matrix_A, predecessor_matrix_A, previous_edge_matrix_A = dijkstra_vertices(edges_of_each_vertex_A, odd_degree_vertices_A, edges)
-#
-# new_dist_matrix_A = complete_graph(odd_degree_vertices_A, distance_matrix_A)
-# print("new_dist_matrix_A", new_dist_matrix_A)
-#
-# perfect_matching_A = greedy_algorithm(new_dist_matrix_A)
-# print("perfect_matching_A", perfect_matching_A)
-#
 
 
 end = time.time()
