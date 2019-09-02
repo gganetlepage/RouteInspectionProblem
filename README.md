@@ -40,6 +40,10 @@ Progress
 
 Currently, this project is at "determination of cycles" phase in the path determination section
 
+Noticable point
+---------------
+
+This project is not done using OOP, I didn't know how to do it on Python at the time
 
 
 
