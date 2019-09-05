@@ -367,7 +367,7 @@ def partition(vertices_list, low, high):
 
 
 def quicksort(vertices_list, low, high):
-    if high>= low:
+    if high <= low:
         return "Error in indexes"
     else:
         
@@ -375,21 +375,29 @@ def quicksort(vertices_list, low, high):
         quicksort(vertices_list, low, pi-1) # before pi
         quicksort(vertices_list, pi+1, high) # after pi
     
+def reducing_list(vertices_list): # each vertex is occuring twice in the vertices_list, we only it once it fasten the method
+    reduced_list = []
+    size = len(vertices_list)
+    steps = int(size / 2)
+    for i in range(steps):
+        reduced_list.append(vertices_list[2*i])
+    return reduced_list
     
 
-def quicksort_vertices(vertices_list, vertices, new_edges): #attention cependant, il faut y insérer new_edges
-    # IMPORTANT : use a copy of the list, to be able to compare then
+def vertices_cycle(cycle_list, new_edges):
+    vertices_list = []
+    for x in cycle_list:
+        y = vertices_of_a_edge_list(x, new_edges)
+        quicksort(y, 0, len(y)-1)
+        reduced_list = reducing_list(y)
+        vertices_list.append(reduced_list)
+    return vertices_list
+    
 
-    return True
 
 
 
 
-"""
-tri par bulle
-tri récursif ?
-
-"""
 
 
 
@@ -406,16 +414,11 @@ def solving(vertices, edges):
     new_edges_of_each_vertex = edges_of_each_vertex(vertices, new_edges, new_vertice_deg)
     
     cycle_list1 = cycle_list(new_edges, new_edges_of_each_vertex)
-#    vertices_of_a_edge_list(cycle_list1[0], new_edges)
-    cycle1 = cycle_list1[0]
-    c_vertices_list1 = vertices_of_a_edge_list(cycle1, new_edges)
-#    if len(cycle_list1) > 1:
-#        cycle2 = cycle_list1[1]
-#        return cycle1, cycle2
-#    else:
-#        return cycle1
-#    
-    return cycle_list1, c_vertices_list1 #, vertices_of_a_edge_list  #"odd", odd_deg_vertices,"edges", edges_per_vertex, "dist", distance_matrix, "pred", predecessor_matrix, "prev", previous_edge_matrix
+    vertices_list = vertices_cycle(cycle_list1, new_edges)
+    
+    
+
+    return vertices_list
     
     
 
@@ -434,9 +437,7 @@ c_vertices =[0,1,2,3,4]
 c_edges = [[0,1,3],[0,2,10],[1,2,2],[3,2,2],[1,3,4],[1,4,1],[4,3,7]]
 
 c_solution= solving(c_vertices, c_edges)
-c1_list = c_solution[1]
-quicksort(c1_list, 0, 6)
-print(c1_list)
+print(c_solution)
 
 
 """EXEMPLE 3"""
