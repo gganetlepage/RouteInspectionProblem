@@ -316,6 +316,7 @@ def cycle(starting_vertex, edges, edges_of_each_vertex,available_edges):
         boolean_edges, selected_edge = following_edge(current_vertex, edges, edges_of_each_vertex, available_edges)
     return cycle, available_edges
 
+
 def cycle_list(edges, edges_of_each_vertex):
     size = len(edges)
     available_edges = size * [True]
@@ -341,14 +342,56 @@ def cycle_list(edges, edges_of_each_vertex):
     return cycle_list
 
 
+def vertices_of_a_edge_list(cycle, new_edges):
+    size = len(cycle)
+    vertices_list = []
+    for i in range(size): #create a list indicating the vertices and the edge concerned
+        edge_index = cycle[i]
+        edge = new_edges[edge_index]
+        vertices_list.append([edge[0], edge_index])
+        vertices_list.append([edge[1], edge_index])
+        
+    return vertices_list
+
+
+
+def partition(vertices_list, low, high):
+    pivot = vertices_list[high][0] # element used for comparaison
+    i = low-1 # index used to swap
+    for j in range(low, high):
+        if vertices_list[j][0]< pivot:
+            i += 1  
+            vertices_list[i], vertices_list[j] = vertices_list[j], vertices_list[i]
+    vertices_list[i+1], vertices_list[high] = vertices_list[high], vertices_list[i+1]
+    return i+1 #index of pi
+
+
+def quicksort(vertices_list, low, high):
+    if high>= low:
+        return "Error in indexes"
+    else:
+        
+        pi = partition(vertices_list, low, high) # pi is partitioning index, verticesl_list[pi] is now at the right place
+        quicksort(vertices_list, low, pi-1) # before pi
+        quicksort(vertices_list, pi+1, high) # after pi
+    
+    
+
+def quicksort_vertices(vertices_list, vertices, new_edges): #attention cependant, il faut y insérer new_edges
+    # IMPORTANT : use a copy of the list, to be able to compare then
+
+    return True
 
 
 
 
-#def scheduling(edges, edges_of_each_vertex): #edges = new_edges and edges_of_each_vertex = new_edges_of_each_vertex
-#    cycle_list = cycle_list(edges, edges_of_each_vertex)
-#    eulerian_cycle = eulerian_cycle(cycle_list)
-#    return eulerian_cycle
+"""
+tri par bulle
+tri récursif ?
+
+"""
+
+
 
 
 def solving(vertices, edges):
@@ -362,8 +405,17 @@ def solving(vertices, edges):
     new_vertice_deg = vertices_degree(vertices, new_edges)
     new_edges_of_each_vertex = edges_of_each_vertex(vertices, new_edges, new_vertice_deg)
     
-    
-    return new_edges_of_each_vertex #"odd", odd_deg_vertices,"edges", edges_per_vertex, "dist", distance_matrix, "pred", predecessor_matrix, "prev", previous_edge_matrix
+    cycle_list1 = cycle_list(new_edges, new_edges_of_each_vertex)
+#    vertices_of_a_edge_list(cycle_list1[0], new_edges)
+    cycle1 = cycle_list1[0]
+    c_vertices_list1 = vertices_of_a_edge_list(cycle1, new_edges)
+#    if len(cycle_list1) > 1:
+#        cycle2 = cycle_list1[1]
+#        return cycle1, cycle2
+#    else:
+#        return cycle1
+#    
+    return cycle_list1, c_vertices_list1 #, vertices_of_a_edge_list  #"odd", odd_deg_vertices,"edges", edges_per_vertex, "dist", distance_matrix, "pred", predecessor_matrix, "prev", previous_edge_matrix
     
     
 
@@ -374,55 +426,17 @@ vertices, edges = parse_file("paris_map.txt") # sys.argv[1]
 
 print("\n ZONE DE TEST \n")
 
+
 """EXEMPLE 2"""
 
 print("\n exemple 2")
 c_vertices =[0,1,2,3,4]
 c_edges = [[0,1,3],[0,2,10],[1,2,2],[3,2,2],[1,3,4],[1,4,1],[4,3,7]]
-c_vertices_degree = vertices_degree(c_vertices,c_edges)
-c_odd__degree_vertices = odd_degree_vertices(c_vertices_degree)
-c_edges_of_each_vortex = edges_of_each_vertex(c_vertices, c_edges, c_vertices_degree)
-c_distance_matrix, c_predecessor_matrix, c_previous_edge_matrix = dijkstra_vertices(c_edges_of_each_vortex, c_odd__degree_vertices, c_edges)
-c_new_dist_matrix = complete_graph(c_odd__degree_vertices, c_distance_matrix)
-c_correct_perfect_matching = greedy_algorithm2(c_new_dist_matrix,c_odd__degree_vertices)
-c_new_edges = graph_with_added_edges(c_correct_perfect_matching, c_predecessor_matrix, c_previous_edge_matrix, c_edges)
-c_tot_dist = totaldistance(c_new_edges)
-c_new_vertices_degree = vertices_degree(c_vertices, c_new_edges)
-c_new_edges_of_each_vertex = edges_of_each_vertex(c_vertices, c_new_edges, c_new_vertices_degree)
-
 
 c_solution= solving(c_vertices, c_edges)
-print(c_solution)
-
-# TODO ici on applique le problème à l'exemple C
-
-
-#available_c_edges = len(c_edges) * [True]
-#cycle_listC = []
-#cycleC1, available_c_edges1 = cycle(0,c_new_edges, c_new_edges_of_each_vertex, available_c_edges)
-#cycle_listC.append(cycleC1)
-#boolC1, following_edgeC1 = available_edge_index(available_c_edges1)
-#following_vertex_C1 = c_edges[following_edgeC1][0]
-#print("cycleC1", cycleC1, available_c_edges1)
-#print("cycle_listC", cycle_listC)
-#print("boolC1", boolC1)
-#print("follow i:1",following_edgeC1, following_vertex_C1)
-#cycleC2, available_c_edges2 = cycle(following_vertex_C1, c_new_edges, c_new_edges_of_each_vertex, available_c_edges1)
-#cycle_listC.append(cycleC2)
-#boolC2, following_edgeC2 = available_edge_index(available_c_edges2)
-#print("cycleC2", cycleC2, available_c_edges2)
-#print("cycle_listC",cycle_listC)
-#print("boolC2", boolC2)
-
-
-#
-#cycle_listC = cycle_list(c_edges, c_edges_of_each_vortex)
-#print("cycle_listC", cycle_listC)
-
-
-# ne marche pas comme il le faudrait
-
-
+c1_list = c_solution[1]
+quicksort(c1_list, 0, 6)
+print(c1_list)
 
 
 """EXEMPLE 3"""
@@ -430,39 +444,30 @@ print("\n exemple 3")
 d_vertices = [0,1,2,3,4,5,6]
 d_edges = [[0,2,3],[1,2,7],[1,5,1], [1,4,2],[4,5,4],[2,4,8],[2,6,6],[2,3,4],[3,6,1],[6,4,5],[4,3,3]]
 
-
 d_solution = solving(d_vertices, d_edges)
 print(d_solution)
 
 
 
-# TODO ici on applique le problème à l'exemple D
-#available_d_edges = len(d_edges) * [True]
-#cycleD1, available_d_edges1 = cycle(0,d_edges, new_edges_of_each_vertex_D, available_d_edges)
-#print("d_edges[9][0]", d_edges[9][0])
-#cycleD2, available_d_edges2 = cycle(6, d_edges, new_edges_of_each_vertex_D, available_d_edges1)
-# print("cycleD1", cycleD1, available_d_edges1)
-# print("cycleD2", cycleD2, available_d_edges2)
-
-
-
 """Exemple 4"""
 print("\n Exemple 4")
-#verticesE = [0,1,2,3,4,5,6,7]
-#edgesE = [[0,1,1], [1,2,1], [2,3,1], [3,4,1], [2,5,1], [4,6,1], [6,7,1]]
-#vertices_degree_E = vertices_degree(verticesE, edgesE)
+e_vertices = [0,1,2,3,4,5,6,7]
+e_edges = [[0,1,1], [1,2,1], [2,3,1], [3,4,1], [2,5,1], [4,6,1], [6,7,1]]
+e_solution = solving(e_vertices, e_edges)
+print(e_solution)
+#vertices_degree_E = vertices_degree(e_vertices, e_edges)
 #odd_degree_vertices_E = odd_degree_vertices(vertices_degree_E)
-#edges_of_each_vortex_E = edges_of_each_vertex(verticesE,edgesE,vertices_degree_E)
-#distance_matrix_E, predecessor_matrix_E, previous_edge_matrix_E = dijkstra_vertices(edges_of_each_vortex_E,odd_degree_vertices_E,edgesE)
+#edges_of_each_vortex_E = edges_of_each_vertex(e_vertices,e_edges,vertices_degree_E)
+#distance_matrix_E, predecessor_matrix_E, previous_edge_matrix_E = dijkstra_vertices(edges_of_each_vortex_E,odd_degree_vertices_E,e_edges)
 #new_dist_matrix_E = complete_graph(odd_degree_vertices_E, distance_matrix_E)
 #perfect_matching_E = greedy_algorithm(new_dist_matrix_E)
 #correct_perfect_matching_E = greedy_algorithm2(new_dist_matrix_E, odd_degree_vertices_E)
-#new_edges_E = graph_with_added_edges(correct_perfect_matching_E, predecessor_matrix_E, previous_edge_matrix_E, edgesE)
+#new_edges_E = graph_with_added_edges(correct_perfect_matching_E, predecessor_matrix_E, previous_edge_matrix_E, e_edges)
 #totdistE = totaldistance(new_edges_E)
-#new_vertices_degree_E = vertices_degree(verticesE, new_edges_E)
-#new_edges_of_each_vertex_E = edges_of_each_vertex(verticesE, new_edges_E, new_vertices_degree_E)
+#new_vertices_degree_E = vertices_degree(e_vertices, new_edges_E)
+#new_edges_of_each_vertex_E = edges_of_each_vertex(e_vertices, new_edges_E, new_vertices_degree_E)
 
-#print("edgesE",len(edgesE), edgesE)
+#print("e_edges",len(e_edges), e_edges)
 #print("odd_degree_vertices_E", odd_degree_vertices_E)
 #print("perfect_matching_E", perfect_matching_E)
 #print("correct_perfect_matching_E", correct_perfect_matching_E)
@@ -470,10 +475,10 @@ print("\n Exemple 4")
 #print("totdistE", totdistE)
 
 # TODO ici on applique le problème à l'exemple E
-#available_edgesE = len(edgesE) * [True]
-#cycleE1, available_edgesE1 = cycle(0,edgesE, new_edges_of_each_vertex_E, available_edgesE)
+#available_e_edges = len(e_edges) * [True]
+#cycleE1, available_e_edges1 = cycle(0,e_edges, new_edges_of_each_vertex_E, available_e_edges)
 
-# print("cycleE1", cycleE1, available_edgesE1)
+# print("cycleE1", cycleE1, available_e_edges1)
 
 
 
