@@ -479,35 +479,108 @@ def add_list_into_list(cycle_list1, cycle_list2, vertices_list1, vertices_list2,
     return concatenated_list
 
 
-# this method is not finished
-def put_all_cycles_into_one(cycle_list, vertices_list, new_edges):
+   
+    
+
+#try to treat every case possible
+
+def put_all_cycles_into_one3(cycle_list, vertices_list, new_edges):
     #vertices_list is reduced_list
     
     #loop WHILE here to iterate on every additional cycle
-    if len(vertices_list) >= 2:
+#    if len(vertices_list) >= 2:
+    if len(cycle_list) >= 2:
         vertices_list1 = vertices_list[0]
         vertices_list2 = vertices_list[1]
         present, i_list1, i_list2 = comparison_vertices_list(vertices_list1, vertices_list2)
         if present:
-#            cycle_list # why is it here ?
             concatenated_list = add_list_into_list(cycle_list[0], cycle_list[1], vertices_list1, vertices_list2, new_edges, i_list1, i_list2)
+            #cycle _list is updated by add_list_into_list()
+            # so the second element of cycle_list needs to be deleted after that
+            # but nothing has been done concerning vertices_list, which needs to be calculated again ?
             return concatenated_list
         else:
-            return "there isn't a match there for the moment"
+            return "there isn't a match there for the moment" # modification à faire: créer un compteur, itérer tant que l'on n'a pas present = true
     else:
-        return cycle_list #there is only one cycle or none
+        return cycle_list[0] #there is only one cycle or none
     
 
-# TODO put the comparison_vertices_list method out of the method
+def put_all_cycles_into_one2(cycle_list, vertices_list, new_edges):
+    #tentative récursive ?
+    if len(cycle_list)<= 1:
+        if len(cycle_list) == 1:
+            return cycle_list[0]
+        else:
+            return cycle_list
+    else:
+        vertices_list1 = vertices_list[0] #NNONN, vertices_list[0] va être mise à jour
+        count = 1
+        count_error = 0 # TODO in case the function is not working properly 
+        present, i_list1, i_list2 = comparison_vertices_list(vertices_list1, vertices_list[count])
+        size = len(vertices_list)
+        while not present and count < size and count_error <10:
+            count += 1
+            present, i_list1, i_list2 = comparison_vertices_list(vertices_list1, vertices_list[count])
+            count_error += 1
+        if present:
+            concatenated_list = add_list_into_list(cycle_list[0], cycle_list[count], vertices_list1, vertices_list[count], new_edges, i_list1, i_list2)
+            deleted_cycle = cycle_list[count]
+            # vertices_list must be updated now ! does ne_edges needs to be too ?
+            vertices_list = vertices_cycle(cycle_list, new_edges)
+            return True
+    return True
 
-    
+
+def put_all_cycles_into_one(cycle_list, vertices_list, new_edges):
+    count_error = 0 # TODO
+    while len(cycle_list) > 1 and  count_error < 10:
+        count = 1
+        count_error += 1
+        present, i_list1, i_list2 = comparison_vertices_list(vertices_list[0], vertices_list[count])
+        count_error2 = 0 #TODO
+        while not present:
+            count += 1
+            count_error2 += 1
+            present, i_list1, i_list2 = comparison_vertices_list(vertices_list[0], vertices_list[count])
+        # a vertice is present on both cycles (fro cycle 0 and cycle number "count")
         
+#        concatenated_list = add_list_into_list(cycle_list[0], cycle_list[count], vertices_list[0], vertices_list[count], new_edges, i_list1, i_list2)
+        add_list_into_list(cycle_list[0], cycle_list[count], vertices_list[0], vertices_list[count], new_edges, i_list1, i_list2)
+#        deleted_cycle = cycle_list.pop(count)
+        cycle_list.pop(count)
+        vertices_list = vertices_cycle(cycle_list, new_edges)
+    return cycle_list[0]
+
+        
+            
+
+
+      
+            
+    
+
+"""
+Reflexions :
+    le return concatenated_list n'est pas utilie lors des différentes itérations, il sert pour le résultat final uniquement
+    une fois la méthode appelée, cycle_list[0] est modifiée, et est constituée de son cycle intiale ainsi que du cycle de cycle_list[1]
+    PAR CONTRE, pour reitérer la méthode, il faut actualiser vertices_list !!
+    Peut-on le faire récursivement ?
+    à la limte le faire avec une boucle tant que. Du genre :
+        whle (len(cycle_list) >= 2 ):
+            concatenated_list = put_all_cycles_into_one
+            cycle_list[1].delete()  ????
+            actualiser vertices_list # ATTENTION ici vertices_list correspond à quoi ? vertices_list classique, reduced_list ou autre ?
+            
+    Quelle différence entre add_list_into_list et put_all_cycles_into_one
+    
+    Gestion des cas où il n'y a pas de 
+    
+"""
+
+
+    
     
          
-#def identification_of_matching_vertices():     
-    
-#il faut insérer la seconde liste après l'edge entering, et avant l'edge outgoing    
-    
     
     
     
@@ -529,8 +602,9 @@ def solving(vertices, edges):
     vertices_list = vertices_cycle(cycle_list1, new_edges)
     # identifying matching vertices, DANGER how to behave if only one element in the list ?
     
-    concatenated_list = put_all_cycles_into_one(cycle_list1, vertices_list, new_edges)
+    #concatenated_list = put_all_cycles_into_one(cycle_list1, vertices_list, new_edges)
     
+    final_cycle = put_all_cycles_into_one(cycle_list1, vertices_list, new_edges)
     
     
     
@@ -543,7 +617,7 @@ def solving(vertices, edges):
     
     
 
-    return concatenated_list
+    return final_cycle
     
     
 
