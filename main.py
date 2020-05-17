@@ -1,17 +1,15 @@
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import matplotlib.colors as clr
+import matplotlib.animation as animation
+from matplotlib.animation import FuncAnimation
 from random import randint
-
 
 import sys
 import time
 import heapq
 import copy
-
-
-
 
 
 def parse_file(file_name):
@@ -37,74 +35,58 @@ def parse_file(file_name):
 
     return vertices, edges
 
-"""Gradient method for plotting used is from M. Southgate : https://bsou.io/posts/color-gradients-with-python"""
-
-def hex_to_RGB(hex):
-  ''' "#FFFFFF" -> [255,255,255] '''
-  # Pass 16 to the integer function for change of base
-  return [int(hex[i:i+2], 16) for i in range(1,6,2)]
-
-def linear_gradient(start_hex, finish_hex="#FFFFFF", n=10):
-  ''' returns a gradient list of (n) colors between
-    two hex colors. start_hex and finish_hex
-    should be the full six-digit color string,
-    inlcuding the number sign ("#FFFFFF") '''
-  # Starting and ending colors in RGB form
-  old_s = hex_to_RGB(start_hex)
-  old_f = hex_to_RGB(finish_hex)
-  # Initilize a list of the output colors with the starting color within 0-1 value range
-  s = [i/255.0 for i in old_s]
-  f = [i/255.0 for i in old_f]
-  RGB_list = [s]
-  # Calcuate a color at each evenly spaced value of t from 1 to n
-  for t in range(1, n):
-    # Interpolate RGB vector for color at the current value of t
-    curr_vector = [
-        s[j] + (float(t)/(n-1))*(f[j]-s[j])
-      for j in range(3)
-    ]
-    # Add it to our list of output colors
-    RGB_list.append(curr_vector)
-
-  return RGB_list
 
 
 
 
-def plot_sample2(vertices, edges):
-    """
+def plot_sample(vertices, edges):
+    fig, ax = plt.subplots(figsize=(40, 40))
+    for edge in edges:
+        ax.plot([_[0] for _ in edge[-2:]], [_[1] for _ in edge[-2:]], linestyle='-', color='grey')
+    ax.plot([vertex[0] for vertex in vertices], [vertex[1] for vertex in vertices], "k.")
+    # ax.plot(vertices[0][0], vertices[0][1], 'ro')
+    plt.savefig("edgesPathGraph.png")
+    plt.show()
+
+
+def plot_sample2(vertices, edges, number):
+    """deprecated"""
     # plot vertices
     sample_1 = [vertices[randint(0, len(vertices) - 1)] for _ in range(0, int(number))]
     plt.plot([_[0] for _ in sample_1], [_[1] for _ in sample_1], "k.")
     plt.show()
-    """
     # plot edges
-    #colors =cm.viridis(np.linspace(0,1,len(edges)))
-    colors = linear_gradient("#FF0000","#000000",len(edges))
-    print("colors", colors)
-    for edge,c in zip(edges,colors):
-        #plt.plot([_[0] for _ in edge[-2:]], [_[1] for _ in edge[-2:]], "k-")
-        #plt.plot([_[0] for _ in edge[-2:]], [_[1] for _ in edge[-2:]], color=c)
-        plt.plot([_[0] for _ in edge[-2:]], [_[1] for _ in edge[-2:]], color=c)
-    plt.savefig("finalPath.png")
-    plt.show()
-
-
-
-
-
-def plot_sample(vertices, edges, number):
-    # plot vertices
-    sample_1 = [vertices[randint(0, len(vertices) - 1)] for _ in range(0, int(number))]
-    plt.plot([_[0] for _ in sample_1], [_[1] for _ in sample_1], "k.")
-    plt.show()
-
-    # plot edges
-    #sample_2 = [edges[randint(0, len(edges) - 1)] for _ in range(0, int(number))]
-    colors = cm.rainbow(np.linspace(0,1,len(edges)))
+    # sample_2 = [edges[randint(0, len(edges) - 1)] for _ in range(0, int(number))]
+    colors = cm.rainbow(np.linspace(0, 1, len(edges)))
     for edge in edges:
         plt.plot([_[0] for _ in edge[-2:]], [_[1] for _ in edge[-2:]], "k-")
     plt.show()
+
+
+def plot_sample_test(vertices, edges):
+    fig, ax = plt.subplots(figsize=(40, 20))
+
+    def init_func():
+        for edge in edges:
+            ax.plot([_[0] for _ in edge[-2:]], [_[1] for _ in edge[-2:]], linestyle='-', color='grey')
+        # ax.plot([vertex[0] for vertex in vertices], [vertex[1] for vertex in vertices], "k.")
+        ax.plot(vertices[0][0], vertices[0][1], 'ro')
+
+    def update(frame):
+        edge = edges[frame]
+        line, = ax.plot([_[0] for _ in edge[-2:]], [_[1] for _ in edge[-2:]], linestyle='-', color='blue')
+        return line,
+
+    """class matplotlib.animation.FuncAnimation(fig, func,
+     frames=None, init_func=None, fargs=None, save_count=None, *, cache_frame_data=True, **kwargs)"""
+    animation = matplotlib.animation.FuncAnimation(fig,
+                                                   func=update,
+                                                   frames = np.arange(0,len(edges),1),
+                                                   init_func = init_func(),
+                                                   repeat= False)
+    #animation.save("animation.mp4", fps=30, writer='ffmpeg')  # dpi = 150
+    animation.save('animation.mp4')
+    #plt.show()
 
 # Problem Solving
 
@@ -650,13 +632,13 @@ Reflexions :
 """
 
 
-def writeOrder(edgesOrder):
+def write_order(edgesOrder):
     with open('edgesOrder.txt', "w") as f:
         for i in range(len(edgesOrder)):
             f.write(str(edgesOrder[i]) + '\n')
 
 
-def readOrder(realRun):
+def read_order(realRun):
     if realRun:
         with open('edgesOrder.txt', "r") as f:
             content = f.readlines()
@@ -673,93 +655,83 @@ def readOrder(realRun):
             return edgesOrder
 
 
-def findEdge(vertex, edges):
-    """
-    :param vertex:
-    :param edges: list of edges
-    :return: index from edges, where vertex appears
-    """
-    for i in range(len(edges)):
-        if edges[i][0] == vertex or edges[i][1] == vertex:
-            return i
-    return "something wrong appended"
-
-
-def isVertexInEdge(vertex, edge):
+def is_vertex_in_edge(vertex, edge):
     return vertex == edge[0] or vertex == edge[1]
 
 
-def associationNewAndOldEdges(oldEdges, newEdges, edgesOrder):
-    oldSize = len(oldEdges)
-    newSize = len(newEdges)
-    if newSize == oldSize:
-        return edgesOrder
+def association_new_and_old_edges(old_edges, new_edges, edges_order):
+    old_size = len(old_edges)
+    new_size = len(new_edges)
+    if new_size == old_size:
+        return edges_order
     else:
-        edgesAssociation = []
+        edges_association = []
         # initialization initial edges, no change
-        for i in range(len(oldEdges)):
-            edgesAssociation.append(i)
+        for i in range(len(old_edges)):
+            edges_association.append(i)
         # association of the old edges
-        for i in range(oldSize, newSize):
-            for j in range(oldSize):
-                if newEdges[i] == oldEdges[j]:
-                    edgesAssociation.append(j)
+        for i in range(old_size, new_size):
+            for j in range(old_size):
+                if new_edges[i] == old_edges[j]:
+                    edges_association.append(j)
                     break
         # now association list is correct
-        correctEdgesOrder = []
-        for i in range(len(edgesOrder)):
-            announcedIndex = edgesOrder[i]
-            if announcedIndex >= oldSize:
+        correct_edges_order = []
+        for i in range(len(edges_order)):
+            announced_index = edges_order[i]
+            if announced_index >= old_size:
                 # this is an artificially created edge
-                correctIndex = edgesAssociation[announcedIndex]
-                correctEdgesOrder.append(correctIndex)
+                correct_index = edges_association[announced_index]
+                correct_edges_order.append(correct_index)
             else:
                 # this is an initial edge
-                correctEdgesOrder.append(announcedIndex)
-        return correctEdgesOrder
+                correct_edges_order.append(announced_index)
+        return correct_edges_order
 
 
 # no need to extend vertices
 
-def buildOrder(edgesOrder, vertices, edges):
+def build_order(edges_order, vertices, edges):
     """
-    :param edgesOrder:
+    :param edges_order:
     :param vertices:
     :param edges: full list of edges
     :return:
     """
-    verticesPath = []
-    edgesPath = []
+    vertices_path = []
+    edges_path = []
     # initialization:
-    currentEdge = edges[edgesOrder[0]]
-    currentVertexIndex = currentEdge[0]
-    if isVertexInEdge(currentEdge, edges[edgesOrder[1]]):
-        realFirstVertexIndex = currentEdge[1]
-        verticesPath.append(vertices[realFirstVertexIndex])
-        verticesPath.append(vertices[currentVertexIndex])
+    current_edge = edges[edges_order[0]]
+    current_vertex_index = current_edge[0]
+    if is_vertex_in_edge(current_edge, edges[edges_order[1]]):
+        real_first_vertex_index = current_edge[1]
+        vertices_path.append(vertices[real_first_vertex_index])
+        vertices_path.append(vertices[current_vertex_index])
     else:
-        realFirstVertexIndex = currentVertexIndex
-        currentVertexIndex = currentEdge[1]
-        verticesPath.append(vertices[realFirstVertexIndex])
-        verticesPath.append(vertices[currentVertexIndex])
-    edgesPath.append(currentEdge)
-    for i in range(1, len(edgesOrder)):
-        currentEdge = edges[edgesOrder[i]]
-        if currentVertexIndex == currentEdge[0]:
-            # then the new vertexIndex will be currentEdge[1]
-            currentVertexIndex = currentEdge[1]
+        real_first_vertex_index = current_vertex_index
+        current_vertex_index = current_edge[1]
+        vertices_path.append(vertices[real_first_vertex_index])
+        vertices_path.append(vertices[current_vertex_index])
+    edges_path.append(current_edge)
+    for i in range(1, len(edges_order)):
+        current_edge = edges[edges_order[i]]
+        if current_vertex_index == current_edge[0]:
+            # then the new vertexIndex will be current_edge[1]
+            current_vertex_index = current_edge[1]
         else:
-            #  then the new vertexIndex will be currentEdge[0]
-            currentVertexIndex = currentEdge[0]
-        verticesPath.append(vertices[currentVertexIndex])
-        edgesPath.append(currentEdge)
-    return edgesPath, verticesPath
+            #  then the new vertexIndex will be current_edge[0]
+            current_vertex_index = current_edge[0]
+        vertices_path.append(vertices[current_vertex_index])
+        edges_path.append(current_edge)
+    return vertices_path, edges_path
 
+def compute_distance(edges):
+    distance = 0
+    for edge in edges:
+        distance += edge[2]
+    return distance
 
-debug = True
-
-
-def solving(vertices, edges):
+def solving(vertices, edges, debug=False):
     t0 = time.time()
     if debug:
         print("vertices", vertices)
@@ -809,42 +781,40 @@ def solving(vertices, edges):
 
     # identifying matching vertices, DANGER how to behave if only one element in the list ?
 
-    edgesOrder = put_all_cycles_into_one(cycle_list1, vertices_list, new_edges)
+    edges_order = put_all_cycles_into_one(cycle_list1, vertices_list, new_edges)
     if debug:
-        print("edgesOrder", edgesOrder)
+        print("edges_order", edges_order)
     t2 = time.time()
 
-    realEdgesOrder = associationNewAndOldEdges(edges, new_edges, edgesOrder)
+    real_edges_order = association_new_and_old_edges(edges, new_edges, edges_order)
     if debug:
-        print("realEdgesOrder", realEdgesOrder)
+        print("real_edges_order", real_edges_order)
 
-    # writeOrder(realEdgesOrder)
+    # write_order(real_edges_order)
 
     print(t2 - t1)
-    edgesPath, verticesPath = buildOrder(edgesOrder, vertices, new_edges)
+    edges_path, vertices_path = build_order(edges_order, vertices, new_edges)
 
     if debug:
-        print("edgesPath", edgesPath)
-        print("verticesPath", verticesPath)
+        print("edges_path", edges_path)
+        print("vertices_path", vertices_path)
 
-    return edgesPath, verticesPath
+    return edges_path, vertices_path
 
 
 start = time.time()
 
 print("\n ZONE DE TEST \n")
 
-testList = []
-
 """EXEMPLE 2"""
 print("\n exemple 2")
 c_vertices = [0, 1, 2, 3, 4]
 c_edges = [[0, 1, 3], [0, 2, 10], [1, 2, 2], [3, 2, 2], [1, 3, 4], [1, 4, 1], [4, 3, 7]]
 
-# edgesPath, verticesPath = solving(c_vertices, c_edges)  # gives the optimal vertex order to visit
+# edges_path, vertices_path = solving(c_vertices, c_edges)  # gives the optimal vertex order to visit
 
 
-# print("readOrder",readOrder())
+# print("read_order",read_order())
 
 
 """EXEMPLE 3"""
@@ -864,13 +834,6 @@ e_edges = [[0, 1, 1], [1, 2, 1], [2, 3, 1], [3, 4, 1], [2, 5, 1], [4, 6, 1], [6,
 # e_solution = solving(e_vertices, e_edges)
 # print(e_solution)
 
-""" Realistic data base """
-dataV = [[0, 0], [1, 2], [3, 4], [1, 7], [5, 2], [8, 9], [4, 6], [2, 10]]  # [v0,v1,...,vn], for each : vi = [xi,yi]
-
-
-def computeDistance(v1, v2):
-    return ((v1[0] - v2[0]) ** 2 + (v1[1] - v2[1]) ** 2) ** 0.5
-
 
 """ Exemple Principal"""
 
@@ -878,67 +841,19 @@ print("\n exemple principale")
 
 vertices, edges = parse_file("paris_map.txt")  # sys.argv[1]
 
-# edgesPath, verticesPath = solving(vertices, edges)
+# edges_path, vertices_path = solving(vertices, edges)
 
-edgesOrder = readOrder(True)
-edgesPath, verticesPath = buildOrder(edgesOrder, vertices, edges)
+edges_order_main = read_order(True)
+vertices_path_main, edges_path_main = build_order(edges_order_main, vertices, edges)
 
-# print("edgesOrder", edgesOrder)
-# print("edgesPath", edgesPath)
+# print("edges_order", edges_order)
+# print("edges_path", edges_path)
 
-plot_sample2(verticesPath, edgesPath)
+# plot_sample(vertices_path_main, edges_path_main) #sure it is not vertices directly,
+# no need to plot several times the same vertex?
 
-
-# initial map
-# plot_sample(vertices, edges, len(edges))
-
-# vertices_degree_A = vertices_degree(vertices, edges)
-# odd_degree_vertices_A = odd_degree_vertices(vertices_degree_A)
-# edges_of_each_vertex_A = edges_of_each_vertex(vertices, edges, vertices_degree_A)
-# distance_matrix_A, predecessor_matrix_A, previous_edge_matrix_A = dijkstra_vertices(edges_of_each_vertex_A, odd_degree_vertices_A, edges)
-# new_dist_matrix_A = complete_graph(odd_degree_vertices_A, distance_matrix_A)
-#
-# correct_perfect_matching_A = greedy_algorithm2(new_dist_matrix_A, odd_degree_vertices_A)
-#
-# new_edges_A = graph_with_added_edges(correct_perfect_matching_A, predecessor_matrix_A,previous_edge_matrix_A,edges)
-# totdist_A = totaldistance(new_edges_A)
-#
-# print("totdist_A", totdist_A)
-
-
-# print("vertices_degree : ", vertices_degree_A)
-# print("odd_degree_vertices : ", odd_degree_vertices_A)
-#
-# print("edges of each vertex : ", edges_of_each_vertex_A)
-#
-# print("len(odd_degree_vertices_A) : ", len(odd_degree_vertices_A))
-#
-# print("new_dist_matrix_A", new_dist_matrix_A)
-
-# print("correct_perfect_matching_A", correct_perfect_matching_A)
-
-
-# test sur sommet numero 14 :
-
-# vertex_A = 14
-# print(edges_of_each_vertex_A[14])
-# print(edges[9668])
-# print(edges[10572])
-# print(edges[17549])
-#
-#
-# dijkstra_distance_A, dijkstra_predecessor, dijkstra_previous_edge = dijkstra_vertex(vertex_A, edges_of_each_vertex_A, odd_degree_vertices_A,
-#                                                             edges)
-# print("\n taille dijkstra_distance1", len(dijkstra_distance_A))
-# print("taille dijkstra_predecessor", len(dijkstra_predecessor))
-# print(dijkstra_distance_A)
-# print(dijkstra_predecessor)
-# print("distance à vertex_A: ", dijkstra_distance_A[vertex_A])
-# print("predecesseur à vertex A ? :", dijkstra_predecessor[vertex_A])
-
-
-# DIJKSTRA COMPLET
-
+plot_sample_test(vertices_path_main, edges_path_main)
+#plot_sample(vertices_path_main,edges_path_main)
 
 end = time.time()
 timelapse = end - start
@@ -947,6 +862,4 @@ print(timelapse)
 print("fin")
 
 # vertices, edges = parse_file("paris_map.txt") #sys.argv[1]
-# print(len(vertices[0]), len(edges[0]))
-# plot_sample(vertices, edges, 50000) #sys.argv[2]
 # plot_sample(vertices, edges, 54000) #sys.argv[2]
