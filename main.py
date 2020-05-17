@@ -1,10 +1,7 @@
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import matplotlib.animation as animation
 from matplotlib.animation import FuncAnimation
-from random import randint
+
 
 import sys
 import time
@@ -36,34 +33,16 @@ def parse_file(file_name):
     return vertices, edges
 
 
-
-
-
 def plot_sample(vertices, edges):
     fig, ax = plt.subplots(figsize=(40, 40))
-    for edge in edges:
-        ax.plot([_[0] for _ in edge[-2:]], [_[1] for _ in edge[-2:]], linestyle='-', color='grey')
     ax.plot([vertex[0] for vertex in vertices], [vertex[1] for vertex in vertices], "k.")
     # ax.plot(vertices[0][0], vertices[0][1], 'ro')
+    for edge in edges:
+        ax.plot([_[0] for _ in edge[-2:]], [_[1] for _ in edge[-2:]], linestyle='-', color='grey')
     plt.savefig("edgesPathGraph.png")
     plt.show()
 
-
-def plot_sample2(vertices, edges, number):
-    """deprecated"""
-    # plot vertices
-    sample_1 = [vertices[randint(0, len(vertices) - 1)] for _ in range(0, int(number))]
-    plt.plot([_[0] for _ in sample_1], [_[1] for _ in sample_1], "k.")
-    plt.show()
-    # plot edges
-    # sample_2 = [edges[randint(0, len(edges) - 1)] for _ in range(0, int(number))]
-    colors = cm.rainbow(np.linspace(0, 1, len(edges)))
-    for edge in edges:
-        plt.plot([_[0] for _ in edge[-2:]], [_[1] for _ in edge[-2:]], "k-")
-    plt.show()
-
-
-def plot_sample_test(vertices, edges):
+def plot_animation(vertices, edges):
     fig, ax = plt.subplots(figsize=(40, 20))
 
     def init_func():
@@ -79,31 +58,21 @@ def plot_sample_test(vertices, edges):
 
     """class matplotlib.animation.FuncAnimation(fig, func,
      frames=None, init_func=None, fargs=None, save_count=None, *, cache_frame_data=True, **kwargs)"""
-    animation = matplotlib.animation.FuncAnimation(fig,
-                                                   func=update,
-                                                   frames = np.arange(0,len(edges),1),
+    animation = FuncAnimation(fig,update, frames = np.arange(0,len(edges),1),
                                                    init_func = init_func(),
                                                    repeat= False)
+    #TODO save not working. reported bug. Should be fixed with matplotlib 3.2.2 , currently 3.2.1
     #animation.save("animation.mp4", fps=30, writer='ffmpeg')  # dpi = 150
-    animation.save('animation.mp4')
+    #animation.save('animation.mp4')
     #plt.show()
 
-# Problem Solving
+
 
 def vertices_degree(vertices, edges):
-    """
-    Enumerate the degree of each vertex
-    :param vertices: table of vertices
-    :param edges:  table of edges
-    :return: table, for each vertex, its number of incident edges
-
-    Complexity : O(edges size)
-    """
-    vertices_number = len(vertices)
-    edges_number = len(edges)
-    vertices_degree = vertices_number * [0]
-    for i in range(edges_number):
-        # 1 edge = increased degree for the 2 incident vertices
+    """Enumerate each vertex degree. Complexity: 0(edges)"""
+    vertices_degree = len(vertices) * [0]
+    for i in range(len(edges)):
+        # 1 edge increases degree of the 2 incident vertices
         vertices_degree[edges[i][0]] += 1
         vertices_degree[edges[i][1]] += 1
     return vertices_degree
@@ -111,14 +80,12 @@ def vertices_degree(vertices, edges):
 
 def odd_degree_vertices(vertices_degree):
     """
-    Enumerate the vertices number with a odd degree
     :param vertices_degree: table, for each vertex, its number of incident edges
-    :return: table, for each odd degree vertex, its number
-    Complexity : O(vertices size)
+    :return: table, for each odd degree vertex, its index
+    Enumerate odd degree vertex index. Complexity: 0(vertices)
     """
-    vertices_number = len(vertices_degree)
     odd_degree_vertices = []
-    for i in range(vertices_number):
+    for i in range(len(vertices_degree)):
         if vertices_degree[i] % 2 == 1:
             odd_degree_vertices.append(i)
     return odd_degree_vertices
@@ -126,52 +93,49 @@ def odd_degree_vertices(vertices_degree):
 
 def edges_of_each_vertex(vertices, edges, vertices_degree):
     """
-    Sort the incident edges of each vertex
     :param vertices: table of vertices
     :param edges:  table of edges
     :param vertices_degree: table of vertices degree
     :return: table, incident edges number for each vertex
-    Complexity: O(edges size)
+    Sort the incident edges of each vertex Complexity: O(edges)
     """
-    vertices_number = len(vertices)
-    edges_number = len(edges)
-    edges_of_each_vertex = vertices_number * [0]
-    count_occurence = vertices_number * [0]
-    for i in range(vertices_number):
+    vertices_size = len(vertices)
+    edges_size = len(edges)
+    edges_of_each_vertex = vertices_size * [0]
+    count_occurrence = vertices_size * [0]
+    for i in range(vertices_size):
         edges_of_each_vertex[i] = vertices_degree[i] * [0]
-    for j in range(edges_number):
+    for j in range(edges_size):
         first_vertex = edges[j][0]
         second_vertex = edges[j][1]
         edges_of_each_vertex[first_vertex][
-            count_occurence[first_vertex]] = j  # association of incident edges number to the vertex
-        edges_of_each_vertex[second_vertex][count_occurence[second_vertex]] = j
-        count_occurence[first_vertex] += 1
-        count_occurence[second_vertex] += 1
+            count_occurrence[first_vertex]] = j  # association of incident edges number to the vertex
+        edges_of_each_vertex[second_vertex][count_occurrence[second_vertex]] = j
+        count_occurrence[first_vertex] += 1
+        count_occurrence[second_vertex] += 1
 
     return edges_of_each_vertex
 
 
 def dijkstra_vertex(vertex, edges_of_each_vertex, odd_degree_vertices, edges):
     """
-    apply dijkstra's algorithm starting from parameter vertex.
-    Calculate distance and predecessor edge between parameter vertex and all other odd degree vertices
-
     :param vertex: starting point for dijkstra's algorithm
     :param edges_of_each_vertex:
     :param odd_degree_vertices:
     :param edges:
     :return:
-    Complexity:
+    Apply dijkstra's algorithm starting from parameter vertex.
+    Compute distance and predecessor edge between parameter vertex and all other odd degree vertices
+    Complexity:  # TODO
     """
-    # TODO estimate complexity
-    vertices_number = len(edges_of_each_vertex)
-    # initialisation
-    dijkstra_distance = vertices_number * [sys.maxsize]
+    vertices_size = len(edges_of_each_vertex)
+    # initialization
+    dijkstra_distance = vertices_size * [sys.maxsize]
     dijkstra_distance[vertex] = 0
-    dijkstra_predecessor = vertices_number * [0]  # Verifier si pas d'effet de bord
+    dijkstra_predecessor = vertices_size * [0]  # TODO check no edge effect
     dijkstra_predecessor[vertex] = -1
 
-    dijkstra_previous_edge = vertices_number * [0]
+    dijkstra_previous_edge = vertices_size * [0]
     dijkstra_previous_edge[vertex] = -1
 
     heap = []
@@ -187,7 +151,7 @@ def dijkstra_vertex(vertex, edges_of_each_vertex, odd_degree_vertices, edges):
             weight_successor = weight + edges[edges_of_each_vertex[v][i]][2]
             if weight_successor < dijkstra_distance[adjacent_v]:
                 dijkstra_distance[adjacent_v] = weight_successor
-                dijkstra_predecessor[adjacent_v] = v  # = v ou bien : edges_of_each_vertex[v][i]
+                dijkstra_predecessor[adjacent_v] = v  # = v or edges_of_each_vertex[v][i] .why did I wrote that?
                 dijkstra_previous_edge[adjacent_v] = edges_of_each_vertex[v][i]
                 heapq.heappush(heap, [weight_successor, adjacent_v])
     return dijkstra_distance, dijkstra_predecessor, dijkstra_previous_edge
@@ -195,15 +159,13 @@ def dijkstra_vertex(vertex, edges_of_each_vertex, odd_degree_vertices, edges):
 
 def dijkstra_vertices(edges_of_each_vertex, odd_degree_vertices, edges):
     """
-    Apply dijkstra's algorithm to all odd degree vertices.
-
     :param edges_of_each_vertex:
     :param odd_degree_vertices:
     :param edges:
     :return: matrix of distance and predecessor, for all odd degree vertices
-    Complexity:
+    Apply dijkstra's algorithm to all odd degree vertices. Complexity: #TODO
     """
-    # TODO estimate complexity
+
     vertices_number = len(edges_of_each_vertex)
     odd_degree_vertices_number = len(odd_degree_vertices)
     distance_matrix = vertices_number * [sys.maxsize]
@@ -247,7 +209,7 @@ def minlist(list, treated_vertices, x):
     else:
         return y
 
-
+"""
 def greedy_algorithm(odd_degree_vertices_dist_matrix):  # odd_degree_vertices_dist_matrix = new_dist_matrix
     size = len(odd_degree_vertices_dist_matrix)  # size is an even number
     # for i in range(size):
@@ -265,7 +227,7 @@ def greedy_algorithm(odd_degree_vertices_dist_matrix):  # odd_degree_vertices_di
             # print(x, y, edges_selected)
         x += 1
     return edges_selected  # = perfect matching #Attention les indices de sommets sélectionnés sont ceux du graphe de sommets de degré impair uniquement
-
+"""
 
 # il faut donc faire attention à ensuite convertir en ceux du graphe total original
 
@@ -273,8 +235,6 @@ def greedy_algorithm(odd_degree_vertices_dist_matrix):  # odd_degree_vertices_di
 def greedy_algorithm2(odd_degree_vertices_dist_matrix,
                       odd_degree_vertices):  # odd_degree_vertices_dist_matrix = new_dist_matrix
     size = len(odd_degree_vertices_dist_matrix)  # size is an even number
-    # for i in range(size):
-    #     print(odd_degree_vertices_dist_matrix[i])
     treated_vertices = size * [False]
     edges_size = size / 2
     edges_selected = []
@@ -318,25 +278,17 @@ def graph_with_added_edges(perfect_matching, predecessor_matrix, previous_edge_m
     return new_edges
 
 
-def totaldistance(new_edges):
-    size = len(new_edges)
-    d = 0
-    for i in range(size):
-        d += new_edges[i][2]
-    return d
-
-
 def available_edge_index(available_edges):
-    """available_edges tableau de boolean
-    """
+    """:param available_edges: is_an_edge_available table
+        :return: if a edge is available and index of the first one  """
     i = 0
     size = len(available_edges)
-    bool = True
+    is_an_edge_available = True
     while i < size and not available_edges[i]:
         i += 1
     if i == size:
-        bool = False  # "Toutes les arêtes ont été prises"
-    return bool, i  # i = available edge index
+        is_an_edge_available = False  # "All edges have been taken"
+    return is_an_edge_available, i  # i = first available edge index
 
 
 def following_edge(vertex, edges, edges_of_each_vertex, available_edges):
@@ -498,13 +450,13 @@ def entering_or_outgoing(i, reduced_list, cycle_list, new_edges):  # True = ente
 def real_order_of_cycle(precedent, cycle_list, edge_index_in_cycle):  # edge_index_in_cycle = reduced_list[index][2]
     correct_order_cycle = []
     size = len(cycle_list)
-    if precedent:  # then the edge must be put at the ultimate end, the cycle first leaves the concertex vertex then go back into it
+    if precedent:
+        # then the edge must be put at the ultimate end, the cycle first leaves the concertex vertex then go back into it
         for i in range(edge_index_in_cycle + 1, size):
             correct_order_cycle.append(cycle_list[i])
         for i in range(edge_index_in_cycle + 1):
             correct_order_cycle.append(cycle_list[i])
     else:
-        #        for i in range(edge_index_in_cycle, edge_index_in_cycle - size, -1):
         for i in range(edge_index_in_cycle - size, edge_index_in_cycle):
             correct_order_cycle.append(cycle_list[i])
     return correct_order_cycle
@@ -725,7 +677,7 @@ def build_order(edges_order, vertices, edges):
         edges_path.append(current_edge)
     return vertices_path, edges_path
 
-def compute_distance(edges):
+def total_distance(edges):
     distance = 0
     for edge in edges:
         distance += edge[2]
@@ -846,14 +798,15 @@ vertices, edges = parse_file("paris_map.txt")  # sys.argv[1]
 edges_order_main = read_order(True)
 vertices_path_main, edges_path_main = build_order(edges_order_main, vertices, edges)
 
+
 # print("edges_order", edges_order)
 # print("edges_path", edges_path)
 
 # plot_sample(vertices_path_main, edges_path_main) #sure it is not vertices directly,
 # no need to plot several times the same vertex?
 
-plot_sample_test(vertices_path_main, edges_path_main)
-#plot_sample(vertices_path_main,edges_path_main)
+plot_animation(vertices_path_main, edges_path_main)
+plot_sample(vertices_path_main,edges_path_main)
 
 end = time.time()
 timelapse = end - start
