@@ -2,9 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="038f687f-5ca0-4240-9210-60b13d572209" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/PadamTest.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/PadamTest.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -22,21 +24,17 @@
   </component>
   <component name="ProjectId" id="1P3C1l9ctkrT9Lu1uukJvv8JkMy" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
-  <component name="PropertiesComponent">
-    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
   </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="ToolWindowRun.ShowToolbar" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunManager" selected="Python.main">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
@@ -46,9 +44,9 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="C:\Users\PC\PycharmProjects\test\venv\Scripts\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
@@ -106,13 +104,50 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="COLUMN_ORDER" />
-            </State>
+            <State />
           </value>
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="876" y="403" key="#Notifications" timestamp="1589668694185">
+      <screen x="62" y="0" width="1858" height="1080" />
+    </state>
+    <state x="876" y="403" key="#Notifications/62.0.1858.1080/62.-1080.1858.1080@62.0.1858.1080" timestamp="1589668694185" />
+    <state x="700" y="135" key="#main" timestamp="1589551310732">
+      <screen x="62" y="0" width="1858" height="1080" />
+    </state>
+    <state x="700" y="135" key="#main/62.0.1858.1080/62.-1080.1858.1080@62.0.1858.1080" timestamp="1589551310732" />
+    <state width="927" height="492" key="GridCell.Tab.0.bottom" timestamp="1589716177907">
+      <screen x="62" y="0" width="1858" height="1080" />
+    </state>
+    <state width="927" height="492" key="GridCell.Tab.0.bottom/62.0.1858.1080/62.-1080.1858.1080@62.0.1858.1080" timestamp="1589716177907" />
+    <state width="927" height="492" key="GridCell.Tab.0.center" timestamp="1589716177907">
+      <screen x="62" y="0" width="1858" height="1080" />
+    </state>
+    <state width="927" height="492" key="GridCell.Tab.0.center/62.0.1858.1080/62.-1080.1858.1080@62.0.1858.1080" timestamp="1589716177907" />
+    <state width="927" height="492" key="GridCell.Tab.0.left" timestamp="1589716177906">
+      <screen x="62" y="0" width="1858" height="1080" />
+    </state>
+    <state width="927" height="492" key="GridCell.Tab.0.left/62.0.1858.1080/62.-1080.1858.1080@62.0.1858.1080" timestamp="1589716177906" />
+    <state width="927" height="492" key="GridCell.Tab.0.right" timestamp="1589716177907">
+      <screen x="62" y="0" width="1858" height="1080" />
+    </state>
+    <state width="927" height="492" key="GridCell.Tab.0.right/62.0.1858.1080/62.-1080.1858.1080@62.0.1858.1080" timestamp="1589716177907" />
+    <state x="492" y="185" key="SettingsEditor" timestamp="1589551818336">
+      <screen x="62" y="0" width="1858" height="1080" />
+    </state>
+    <state x="492" y="185" key="SettingsEditor/62.0.1858.1080/62.-1080.1858.1080@62.0.1858.1080" timestamp="1589551818336" />
+    <state x="800" y="454" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1589559404935">
+      <screen x="62" y="0" width="1858" height="1080" />
+    </state>
+    <state x="800" y="454" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/62.0.1858.1080/62.-1080.1858.1080@62.0.1858.1080" timestamp="1589559404935" />
+    <state x="654" y="235" width="672" height="678" key="search.everywhere.popup" timestamp="1589678929942">
+      <screen x="62" y="0" width="1858" height="1080" />
+    </state>
+    <state x="654" y="235" width="672" height="678" key="search.everywhere.popup/62.0.1858.1080/62.-1080.1858.1080@62.0.1858.1080" timestamp="1589678929942" />
   </component>
   <component name="XDebuggerManager">
     <watches-manager>
