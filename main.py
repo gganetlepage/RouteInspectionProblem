@@ -33,7 +33,7 @@ def parse_file(file_name):
 
 
 def plot_sample(vertices, edges):
-    fig, ax = plt.subplots(figsize=(40, 40))
+    fig, ax = plt.subplots(figsize=(15,15))
     ax.plot([vertex[0] for vertex in vertices], [vertex[1] for vertex in vertices], "k.")
     # ax.plot(vertices[0][0], vertices[0][1], 'ro')
     for edge in edges:
@@ -43,7 +43,7 @@ def plot_sample(vertices, edges):
 
 
 def plot_animation(vertices, edges):
-    fig, ax = plt.subplots(figsize=(40, 20))
+    fig, ax = plt.subplots(figsize=(15,15))
 
     def init_func():
         for edge in edges:
@@ -64,7 +64,7 @@ def plot_animation(vertices, edges):
     # TODO save not working. reported bug. Should be fixed with matplotlib 3.2.2 , currently 3.2.1
     # animation.save("animation.mp4", fps=30, writer='ffmpeg')  # dpi = 150
     # animation.save('animation.mp4')
-    # plt.show()
+    plt.show()
 
 
 def vertices_degree(vertices, edges):
@@ -770,17 +770,18 @@ e_edges = [[0, 1, 1], [1, 2, 1], [2, 3, 1], [3, 4, 1], [2, 5, 1], [4, 6, 1], [6,
 def main():
     start = time.time()
     vertices, edges = parse_file("paris_map.txt")  # sys.argv[1]
-
-    sol_edges_path, sol_vertices_path, dist = solving(vertices, edges, read_file="no", write_file=False)
+    # look up at solving method where the configuration can be changed
+    sol_edges_path, sol_vertices_path, dist = solving(vertices, edges, read_file="solution", write_file=False)
     if sol_edges_path == 0 and sol_vertices_path == 0 and dist == 0:
         print('incorrect parameters given for solving method, won\'t plot ')
     else:
         print('total distance:',dist)
-        plot_sample(sol_vertices_path, sol_edges_path)
-        #TODO once matplotlib updates to 3.2.2, add plot_animation
-        # https://github.com/matplotlib/matplotlib/issues/16965
-        # plot_animation(sol_vertices_path, sol_edges_path)
         print('total processing time:', time.time()-start)
+        #plot_sample(sol_vertices_path, sol_edges_path)
+        #TODO once matplotlib updates to 3.2.2, add save() method to plot_animation()
+        # https://github.com/matplotlib/matplotlib/issues/16965
+        plot_animation(sol_vertices_path, sol_edges_path)
+
 
 
 if __name__ == '__main__':
