@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-
 import sys
 import time
 import heapq
@@ -42,6 +41,7 @@ def plot_sample(vertices, edges):
     plt.savefig("edgesPathGraph.png")
     plt.show()
 
+
 def plot_animation(vertices, edges):
     fig, ax = plt.subplots(figsize=(40, 20))
 
@@ -58,14 +58,13 @@ def plot_animation(vertices, edges):
 
     """class matplotlib.animation.FuncAnimation(fig, func,
      frames=None, init_func=None, fargs=None, save_count=None, *, cache_frame_data=True, **kwargs)"""
-    animation = FuncAnimation(fig,update, frames = np.arange(0,len(edges),1),
-                                                   init_func = init_func(),
-                                                   repeat= False)
-    #TODO save not working. reported bug. Should be fixed with matplotlib 3.2.2 , currently 3.2.1
-    #animation.save("animation.mp4", fps=30, writer='ffmpeg')  # dpi = 150
-    #animation.save('animation.mp4')
-    #plt.show()
-
+    animation = FuncAnimation(fig, update, frames=np.arange(0, len(edges), 1),
+                              init_func=init_func(),
+                              repeat=False)
+    # TODO save not working. reported bug. Should be fixed with matplotlib 3.2.2 , currently 3.2.1
+    # animation.save("animation.mp4", fps=30, writer='ffmpeg')  # dpi = 150
+    # animation.save('animation.mp4')
+    # plt.show()
 
 
 def vertices_degree(vertices, edges):
@@ -209,6 +208,7 @@ def minlist(list, treated_vertices, x):
     else:
         return y
 
+
 """
 def greedy_algorithm(odd_degree_vertices_dist_matrix):  # odd_degree_vertices_dist_matrix = new_dist_matrix
     size = len(odd_degree_vertices_dist_matrix)  # size is an even number
@@ -228,6 +228,7 @@ def greedy_algorithm(odd_degree_vertices_dist_matrix):  # odd_degree_vertices_di
         x += 1
     return edges_selected  # = perfect matching #Attention les indices de sommets sélectionnés sont ceux du graphe de sommets de degré impair uniquement
 """
+
 
 # il faut donc faire attention à ensuite convertir en ceux du graphe total original
 
@@ -554,7 +555,7 @@ def put_all_cycles_into_one(cycle_list, vertices_list, new_edges):
             count += 1
             count_error2 += 1
             present, i_list1, i_list2 = comparison_vertices_list(vertices_list[0], vertices_list[count])
-        # a vertice is present on both cycles (fro cycle 0 and cycle number "count")
+        # a vertex is present on both cycles (fro cycle 0 and cycle number "count")
 
         #        concatenated_list = add_list_into_list(cycle_list[0], cycle_list[count], vertices_list[0], vertices_list[count], new_edges, i_list1, i_list2)
         add_list_into_list(cycle_list[0], cycle_list[count], vertices_list[0], vertices_list[count], new_edges, i_list1,
@@ -590,8 +591,8 @@ def write_order(edgesOrder):
             f.write(str(edgesOrder[i]) + '\n')
 
 
-def read_order(realRun):
-    if realRun:
+def read_order(real_run=False):
+    if real_run:
         with open('edgesOrder.txt', "r") as f:
             content = f.readlines()
             edgesOrder = []
@@ -599,7 +600,7 @@ def read_order(realRun):
                 edgesOrder.append(int(content[i]))
             return edgesOrder
     else:
-        with open('verticesOrderRealProblem.txt', "r") as f:
+        with open('edgesOrderSolution.txt', "r") as f:
             content = f.readlines()
             edgesOrder = []
             for i in range(len(content)):
@@ -653,6 +654,7 @@ def build_order(edges_order, vertices, edges):
     vertices_path = []
     edges_path = []
     # initialization:
+    print(edges_order[0])
     current_edge = edges[edges_order[0]]
     current_vertex_index = current_edge[0]
     if is_vertex_in_edge(current_edge, edges[edges_order[1]]):
@@ -677,142 +679,109 @@ def build_order(edges_order, vertices, edges):
         edges_path.append(current_edge)
     return vertices_path, edges_path
 
+
 def total_distance(edges):
     distance = 0
     for edge in edges:
         distance += edge[2]
     return distance
 
-def solving(vertices, edges, debug=False):
+
+# TODO reformulate if elif else by a switch using dictionary
+def solving(vertices, edges, read_file="solution", write_file=False, debug=False):
+    """
+    :param vertices:
+    :param edges:
+    :param debug: print each step
+    :param read_file: "solution" = run edgesOrderSolution.txt, "no" compute entirely the problem, "current" = run current one, which is edgesOrder.txt
+    :param write_file: only possible if read_file = "no", write edgesOrder.txt to save computing time for future executions
+    :return:
+
+    """
     t0 = time.time()
-    if debug:
-        print("vertices", vertices)
-        print("edges", edges)
-    vertices_deg = vertices_degree(vertices, edges)
-    if debug:
-        print("vertices_deg", vertices_deg)
-    odd_deg_vertices = odd_degree_vertices(vertices_deg)
-    if debug:
-        print("odd_deg_vertices", odd_deg_vertices)
-    edges_per_vertex = edges_of_each_vertex(vertices_deg, edges, vertices_deg)
-    if debug:
-        print("edges_per_vertex", edges_per_vertex)
-    distance_matrix, predecessor_matrix, previous_edge_matrix = dijkstra_vertices(edges_per_vertex,
-                                                                                  odd_deg_vertices,
-                                                                                  edges)
-    if debug:
-        print("distance_matrix", distance_matrix)
-        print("predecessor_matrix", predecessor_matrix)
-        print("previous_edge_matrix", previous_edge_matrix)
+    if read_file != "no" and write_file:
+        print('can not write if not doing a complete run')
+        return 0, 0, 0
+    if read_file == "no":
+        print('doing a complete run')
+        # get each vertex degree
+        vertices_deg = vertices_degree(vertices, edges)
+        # get odd degree vertices
+        odd_deg_vertices = odd_degree_vertices(vertices_deg)
+        # get edges of those odd degree vertices
+        edges_per_vertex = edges_of_each_vertex(vertices_deg, edges, vertices_deg)
+        # use dijkstra algorithm to get distance between odd degree vertices
+        distance_matrix, predecessor_matrix, previous_edge_matrix = dijkstra_vertices(edges_per_vertex,
+                                                                                      odd_deg_vertices,
+                                                                                      edges)
+        t1 = time.time()
+        print('time to process up to dijkstra algorithm:', t1 - t0)  # 220sec
+        new_dist_matrix = complete_graph(odd_deg_vertices, distance_matrix)
+        correct_perfect_matching = greedy_algorithm2(new_dist_matrix, odd_deg_vertices)
+        new_edges = graph_with_added_edges(correct_perfect_matching, predecessor_matrix, previous_edge_matrix,
+                                           edges)
+        new_vertices_deg = vertices_degree(vertices, new_edges)
+        new_edges_of_each_vertex = edges_of_each_vertex(vertices, new_edges, new_vertices_deg)
+        # working on list of edges:
+        cycle_list1 = cycle_list(new_edges, new_edges_of_each_vertex)
+        vertices_list = vertices_cycle(cycle_list1, new_edges)
 
-    t1 = time.time()
-    print(t1 - t0)  # 220sec
-    new_dist_matrix = complete_graph(odd_deg_vertices, distance_matrix)
-    if debug:
-        print("new_dist_matrix", new_dist_matrix)
-    correct_perfect_matching = greedy_algorithm2(new_dist_matrix, odd_deg_vertices)
-    if debug:
-        print("correct_perfect_matching", correct_perfect_matching)
-    new_edges = graph_with_added_edges(correct_perfect_matching, predecessor_matrix, previous_edge_matrix, edges)
-    if debug:
-        print("new_edges", new_edges)
-    new_vertices_deg = vertices_degree(vertices, new_edges)
-    if debug:
-        print("new_vertices_deg", new_vertices_deg)
-    new_edges_of_each_vertex = edges_of_each_vertex(vertices, new_edges, new_vertices_deg)
-    if debug:
-        print("new_edges_of_each_vertex", new_edges_of_each_vertex)
+        # identifying matching vertices, DANGER how to behave if only one element in the list ?
 
-    # working on list of edges:
-    cycle_list1 = cycle_list(new_edges, new_edges_of_each_vertex)
-    if debug:
-        print("cycle_list1", cycle_list1)
-    vertices_list = vertices_cycle(cycle_list1, new_edges)
-    if debug:
-        print("vertices_list", vertices_list)
+        edges_order = put_all_cycles_into_one(cycle_list1, vertices_list, new_edges)
+        t2 = time.time()
+        print(t2 - t1)
+        real_edges_order = association_new_and_old_edges(edges, new_edges, edges_order)
+        if write_file:
+            write_order(real_edges_order)
+            print('file wrote')
 
-    # identifying matching vertices, DANGER how to behave if only one element in the list ?
+    elif read_file == 'current':
+        print('reading current file')
+        real_edges_order = read_order(True)
+    else:
+        # read 'solution' file
+        print('reading solution file')
+        real_edges_order = read_order()
 
-    edges_order = put_all_cycles_into_one(cycle_list1, vertices_list, new_edges)
-    if debug:
-        print("edges_order", edges_order)
-    t2 = time.time()
-
-    real_edges_order = association_new_and_old_edges(edges, new_edges, edges_order)
-    if debug:
-        print("real_edges_order", real_edges_order)
-
-    # write_order(real_edges_order)
-
-    print(t2 - t1)
-    edges_path, vertices_path = build_order(edges_order, vertices, new_edges)
-
-    if debug:
-        print("edges_path", edges_path)
-        print("vertices_path", vertices_path)
-
-    return edges_path, vertices_path
+    # edges_path, vertices_path = build_order(real_edges_order, vertices, new_edges)
+    vertices_path, edges_path = build_order(real_edges_order, vertices, edges)
+    dist = total_distance(edges_path)
+    return edges_path, vertices_path, dist
 
 
-start = time.time()
-
-print("\n ZONE DE TEST \n")
 
 """EXEMPLE 2"""
-print("\n exemple 2")
 c_vertices = [0, 1, 2, 3, 4]
 c_edges = [[0, 1, 3], [0, 2, 10], [1, 2, 2], [3, 2, 2], [1, 3, 4], [1, 4, 1], [4, 3, 7]]
 
-# edges_path, vertices_path = solving(c_vertices, c_edges)  # gives the optimal vertex order to visit
-
-
-# print("read_order",read_order())
-
-
 """EXEMPLE 3"""
-print("\n exemple 3")
 d_vertices = [0, 1, 2, 3, 4, 5, 6]
 d_edges = [[0, 2, 3], [1, 2, 7], [1, 5, 1], [1, 4, 2], [4, 5, 4], [2, 4, 8], [2, 6, 6], [2, 3, 4], [3, 6, 1], [6, 4, 5],
            [4, 3, 3]]
 
-# d_solution = solving(d_vertices, d_edges)
-# print(d_solution)
-
-
 """Exemple 4"""
-print("\n Exemple 4")
 e_vertices = [0, 1, 2, 3, 4, 5, 6, 7]
 e_edges = [[0, 1, 1], [1, 2, 1], [2, 3, 1], [3, 4, 1], [2, 5, 1], [4, 6, 1], [6, 7, 1]]
-# e_solution = solving(e_vertices, e_edges)
-# print(e_solution)
-
 
 """ Exemple Principal"""
 
-print("\n exemple principale")
 
-vertices, edges = parse_file("paris_map.txt")  # sys.argv[1]
+def main():
+    start = time.time()
+    vertices, edges = parse_file("paris_map.txt")  # sys.argv[1]
 
-# edges_path, vertices_path = solving(vertices, edges)
+    sol_edges_path, sol_vertices_path, dist = solving(vertices, edges, read_file="no", write_file=False)
+    if sol_edges_path == 0 and sol_vertices_path == 0 and dist == 0:
+        print('incorrect parameters given for solving method, won\'t plot ')
+    else:
+        print('total distance:',dist)
+        plot_sample(sol_vertices_path, sol_edges_path)
+        #TODO once matplotlib updates to 3.2.2, add plot_animation
+        # https://github.com/matplotlib/matplotlib/issues/16965
+        # plot_animation(sol_vertices_path, sol_edges_path)
+        print('total processing time:', time.time()-start)
 
-edges_order_main = read_order(True)
-vertices_path_main, edges_path_main = build_order(edges_order_main, vertices, edges)
 
-
-# print("edges_order", edges_order)
-# print("edges_path", edges_path)
-
-# plot_sample(vertices_path_main, edges_path_main) #sure it is not vertices directly,
-# no need to plot several times the same vertex?
-
-plot_animation(vertices_path_main, edges_path_main)
-plot_sample(vertices_path_main,edges_path_main)
-
-end = time.time()
-timelapse = end - start
-print(timelapse)
-
-print("fin")
-
-# vertices, edges = parse_file("paris_map.txt") #sys.argv[1]
-# plot_sample(vertices, edges, 54000) #sys.argv[2]
+if __name__ == '__main__':
+    main()
