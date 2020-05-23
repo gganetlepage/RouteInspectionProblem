@@ -3,23 +3,29 @@ Route Inspection Problem
 
 Problem
 -------
-Route inspection problem:
+Undirected Route Inspection Problem: 
 The delivery person has to travel across all Paris streets.
-Aim is to minimise total distance with an associated delivery person path
+Aim is to minimize total distance with an associated delivery person path.
+https://en.wikipedia.org/wiki/Route_inspection_problem
+
+<img src="edgesPathGraph.png" width ="1000">
 
 Environment
 -----------
 paris_map contains 2 datatypes.
 * Vertex: introduced with its associated cartesian coordinates (x and y position)
-* edge is introduced with its 2 incident vertices, plus distance
+* edge: is introduced with its 2 incident vertices number, plus distance, then the 2 associated vertices. 
 
 Methodology
 -----------
+Problem is mathematically easy, i.e. solvable optimally in polynomial time using T-join problem algorithm. 
+My solution isn't optimal as my program doesn't compute the best perfect complete graph.
+
 First, graph modification:
 
 * If the graph is eulerian, then the delivery person could pass by every edges and only once. Which is a optimal case.
 
-* Graph surely isn't eulerian, so it needs to be changed to become one
+* Graph surely isn't eulerian, so it needs to be changed to become one.
 
 * A graph is eulerian if and only if all vertices have a even degree. Identification of odd degree vertice, objective is that new edges are added to the global graph so all vertices become of even degree
 
@@ -38,12 +44,13 @@ Second, path determination:
 Progress
 --------
 
-Currently, this project is at "determination of cycles" phase in the path determination section
+Currently, algorithm runs, but isn't optimal due to the complete odd degree graph construction is a greedy algorithm and not an optimal one.
+Animation of a chinese postman path runs, but it is not possible to save it due to matplotlib 3.2.1 bug. cf https://github.com/matplotlib/matplotlib/issues/16965
 
 Noticable point
 ---------------
 
-This project is not done using OOP, I didn't know how to do it on Python at the time
+This project is not done using OOP, I didn't know how to do it on Python at the beginning.
 
 
 
