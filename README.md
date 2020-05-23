@@ -46,6 +46,10 @@ Progress
 
 Currently, algorithm runs, but isn't optimal due to the complete odd degree graph construction is a greedy algorithm and not an optimal one.
 Animation of a chinese postman path runs, but it is not possible to save it due to matplotlib 3.2.1 bug. cf https://github.com/matplotlib/matplotlib/issues/16965
+A picture of what the path construction looks like (the following is only the beginning)
+<img src="postmanPathConstruction.png" width ="500">
+
+TODO: do the optimal complete graph, clean up code. Optimize the plot and animation as it is currently really sloz
 
 Noticable point
 ---------------
