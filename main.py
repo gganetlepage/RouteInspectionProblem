@@ -1,11 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import argparse
 
 import sys
 import time
 import heapq
 import copy
+
+
+def print_hi(name):
+    print(f'Hi, {name}')
 
 
 def parse_file(file_name):
@@ -33,7 +38,7 @@ def parse_file(file_name):
 
 
 def plot_sample(vertices, edges):
-    fig, ax = plt.subplots(figsize=(15,15))
+    fig, ax = plt.subplots(figsize=(15, 15))
     ax.plot([vertex[0] for vertex in vertices], [vertex[1] for vertex in vertices], "k.")
     # ax.plot(vertices[0][0], vertices[0][1], 'ro')
     for edge in edges:
@@ -43,7 +48,7 @@ def plot_sample(vertices, edges):
 
 
 def plot_animation(vertices, edges):
-    fig, ax = plt.subplots(figsize=(15,15))
+    fig, ax = plt.subplots(figsize=(15, 15))
 
     def init_func():
         for edge in edges:
@@ -479,7 +484,7 @@ def list2_into_list1(cycle_list1, real_order_cycle_list2, precedent_list1, edge_
 # delete list1? après la mathode list2_into_list1
 
 
-# this method is not finished 
+# this method is not finished
 def add_list_into_list(cycle_list1, cycle_list2, vertices_list1, vertices_list2, new_edges, i_list1, i_list2):
     #    vertices_list1 = vertices_cycle(cycle_list1, new_edges) vertices_list1 is already reduced_list1
     #    vertices_list2 = vertices_cycle(cycle_list2, new_edges) vertices_list2 is already reduced_list2
@@ -577,11 +582,11 @@ Reflexions :
             concatenated_list = put_all_cycles_into_one
             cycle_list[1].delete()  ????
             actualiser vertices_list # ATTENTION ici vertices_list correspond à quoi ? vertices_list classique, reduced_list ou autre ?
-            
-    Quelle différence entre add_list_into_list et put_all_cycles_into_one
-    
+
+    Quelle différimport argparseence entre add_list_into_list et put_all_cycles_into_one
+
     Gestion des cas où il n'y a pas de 
-    
+
 """
 
 
@@ -703,7 +708,7 @@ def solving(vertices, edges, read_file="solution", write_file=False, debug=False
         print('can not write if not doing a complete run')
         return 0, 0, 0
     if read_file == "no":
-        print('doing a complete run')
+        print('doing a complete run, time estimated: 4 min')
         # get each vertex degree
         vertices_deg = vertices_degree(vertices, edges)
         # get odd degree vertices
@@ -750,39 +755,75 @@ def solving(vertices, edges, read_file="solution", write_file=False, debug=False
     return edges_path, vertices_path, dist
 
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Solve the route inspection problem on the map of Paris.')
 
-"""EXEMPLE 2"""
-c_vertices = [0, 1, 2, 3, 4]
-c_edges = [[0, 1, 3], [0, 2, 10], [1, 2, 2], [3, 2, 2], [1, 3, 4], [1, 4, 1], [4, 3, 7]]
+    parser.add_argument('--file', nargs='?', const='no', default='solution',
+                        help='a string to define how to solve the problem. If \'no\': solve from scratch. If \'current\': solve using edgesOrder.txt. If \'solution\': then solve using the solution which is edgesOrderSolution.txt. const=\'no\', default=\'solution\'')
 
-"""EXEMPLE 3"""
-d_vertices = [0, 1, 2, 3, 4, 5, 6]
-d_edges = [[0, 2, 3], [1, 2, 7], [1, 5, 1], [1, 4, 2], [4, 5, 4], [2, 4, 8], [2, 6, 6], [2, 3, 4], [3, 6, 1], [6, 4, 5],
-           [4, 3, 3]]
+    def str_to_bool(value):
+        if isinstance(value, bool):
+            return value
+        if value.lower() in {'false', 'f', '0', 'no', 'n'}:
+            return False
+        elif value.lower() in {'true', 't', '1', 'yes', 'y'}:
+            return True
+        raise ValueError(f'{value} is not a valid boolean value')
 
-"""Exemple 4"""
-e_vertices = [0, 1, 2, 3, 4, 5, 6, 7]
-e_edges = [[0, 1, 1], [1, 2, 1], [2, 3, 1], [3, 4, 1], [2, 5, 1], [4, 6, 1], [6, 7, 1]]
-
-""" Exemple Principal"""
+    parser.add_argument('--w', type=str_to_bool, nargs='?', const=True, default=False,
+                        help='a boolean to define if the solution is stored in edgesOrder.txt, can only store if --file \'no\'. const=True, default=False')
+    args = parser.parse_args()
+    print(args)
+    # file, write = vars(args)
+    # print('file: ', args.file, ', write: ', args.w)
+    return args.file, args.w
 
 
 def main():
+    print_hi('PyCharm')
+    file, write = parse_arguments()
+    print('file: ', file, ', write: ', write)
     start = time.time()
     vertices, edges = parse_file("paris_map.txt")  # sys.argv[1]
-    # look up at solving method where the configuration can be changed
-    sol_edges_path, sol_vertices_path, dist = solving(vertices, edges, read_file="solution", write_file=False)
+    # look up at the solving function where the configuration can be changed, and the --help
+    sol_edges_path, sol_vertices_path, dist = solving(vertices, edges, read_file=file, write_file=write)
     if sol_edges_path == 0 and sol_vertices_path == 0 and dist == 0:
         print('incorrect parameters given for solving method, won\'t plot ')
     else:
-        print('total distance:',dist)
-        print('total processing time:', time.time()-start)
-        #plot_sample(sol_vertices_path, sol_edges_path)
-        #TODO once matplotlib updates to 3.2.2, add save() method to plot_animation()
+        print('total distance:', dist)
+        print('total processing time:', time.time() - start)
+        # plot_sample(sol_vertices_path, sol_edges_path)
+        # TODO once matplotlib updates to 3.2.2, add save() method to plot_animation()
         # https://github.com/matplotlib/matplotlib/issues/16965
         plot_animation(sol_vertices_path, sol_edges_path)
 
 
+"""Example 2"""
+c_vertices = [0, 1, 2, 3, 4]
+c_edges = [[0, 1, 3], [0, 2, 10], [1, 2, 2], [3, 2, 2], [1, 3, 4], [1, 4, 1], [4, 3, 7]]
+
+"""Example 3"""
+d_vertices = [0, 1, 2, 3, 4, 5, 6]
+d_edges = [[0, 2, 3], [1, 2, 7], [1, 5, 1], [1, 4, 2], [4, 5, 4], [2, 4, 8], [2, 6, 6], [2, 3, 4], [3, 6, 1], [6, 4, 5],
+           [4, 3, 3]]
+
+"""Example 4"""
+e_vertices = [0, 1, 2, 3, 4, 5, 6, 7]
+e_edges = [[0, 1, 1], [1, 2, 1], [2, 3, 1], [3, 4, 1], [2, 5, 1], [4, 6, 1], [6, 7, 1]]
+
+""" Main example"""
+# paris_map.txt
+
 
 if __name__ == '__main__':
     main()
+
+
+
+
+
+
+
+
+
+
