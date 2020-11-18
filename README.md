@@ -53,6 +53,11 @@ This project is not done using OOP, I didn't know how to do it on Python at the 
 
 TODO: do the optimal complete graph, clean up code. Optimize the plot and animation as it is currently really sloz
 
+Dependencies
+------------
+
+numpy, matplotlib, tkinter
+
 How to run the project
 ---------------
 
